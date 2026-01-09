@@ -1,7 +1,7 @@
 # IT Dashboard Pro - Web Application
 
 **Author:** Eyasu Solomon  
-**Version:** 2.0  
+**Version:** 2.1  
 **Languages:** HTML5, CSS3, JavaScript  
 **Type:** Single-Page Application
 
@@ -23,24 +23,43 @@ A professional web-based IT dashboard with modern glassmorphism UI, real-time mo
 - Sidebar navigation with section highlighting
 - Responsive design for all screen sizes
 - Smooth CSS transitions and animations
+- **Theme customization** (Dark, Light, Midnight Blue)
+- **Accent color picker**
 
 ### Real-Time Monitoring
 - **CPU Usage** - Animated progress bar with live updates
 - **Memory Usage** - Visual bar with GB breakdown
 - **Disk Usage** - Color-coded usage indicator
 - **Network Status** - Speed (Mbps) and latency display
+- **Configurable refresh rate** (1s, 2s, 5s, 10s)
+- **Alert thresholds** for CPU and memory
 
 ### Network Activity Chart
 - 12-hour bar chart with upload/download visualization
 - Interactive hover effects with tooltips
 
 ### Process Manager
-- Top 5 processes with CPU/memory stats
-- Process icons and PID display
+- **Full process table** with PID, Name, CPU%, Memory, Status
+- **Search/filter** processes by name
+- **End process** functionality
+- **Refresh** process list
 
-### Services Grid
-- 6 service cards with status indicators
-- Online/Warning/Offline states with glow effects
+### Service Manager
+- **Services table** with Name, Status, Startup Type
+- **Filter** by status (All, Running, Stopped)
+- **Start/Stop** individual services
+- **Restart** service functionality
+
+### System Logs Viewer
+- **Log type** selection (System, Application, Security, etc.)
+- **Log level** filtering (All, Info, Warning, Error)
+- **Formatted entries** with timestamps and color-coded levels
+- **Export logs** to text file
+
+### Network Interfaces
+- **Interface cards** showing eth0, wlan0, docker0, lo
+- **IP addresses** and connection speeds
+- **Active connections table** (Local, Remote, Status, Process)
 
 ### Network Tools Suite
 - **Ping Tool** - Test connectivity with simulated responses
@@ -52,28 +71,51 @@ A professional web-based IT dashboard with modern glassmorphism UI, real-time mo
 - Built-in command-line interface
 - Commands: help, date, whoami, uptime, neofetch, ps, df, clear
 
+### Settings Modal
+- **Theme selection** - Switch between Dark, Light, Midnight Blue
+- **Accent color** - Custom color picker
+- **Refresh rate** - Control monitoring update frequency
+- **Auto-refresh toggle** - Enable/disable live updates
+- **Alert thresholds** - Configure CPU and memory warning levels
+- **Reset to defaults** - Restore original settings
+
 ### Quick Actions
 - Speed Test simulation
 - Clear Cache utility
 - Export System Report (JSON)
 - Password Generator
 
+## Navigation
+
+| Button | Section |
+|--------|---------|
+| Dashboard | Main monitoring view with stats and charts |
+| Processes | Process Manager with table and controls |
+| Network | Network interfaces and active connections |
+| Services | Service Manager with start/stop controls |
+| Tools | Network tools (Ping, Port Scan, DNS, Subnet) |
+| Terminal | Interactive command-line interface |
+| Logs | System log viewer with filtering |
+| Settings | Theme, refresh rate, and alert configuration |
+| About | Application information modal |
+
 ## How to Run
 
-Simply open `index.html` in any modern web browser:
+Simply open `index_pro.html` in any modern web browser:
 
 ```bash
 # Option 1: Open directly
-start index.html
+start index_pro.html
 
 # Option 2: Use a local server
 python -m http.server 8000
-# Then visit http://localhost:8000
+# Then visit http://localhost:8000/index_pro.html
 ```
 
 ## Design Features
 
 - **Dark Theme** - Modern dark UI with gradient backgrounds
+- **Multiple Themes** - Dark, Light, and Midnight Blue options
 - **Responsive Layout** - Works on desktop and mobile devices
 - **CSS Grid** - Flexible dashboard layout
 - **Glassmorphism** - Frosted glass card effects
@@ -84,7 +126,7 @@ python -m http.server 8000
 
 ```
 ╔═══════════════════════════════════════════════════════════════╗
-║                    🖥️ IT Dashboard                            ║
+║                    🖥️ IT Dashboard Pro                        ║
 ╠═══════════════════════════════════════════════════════════════╣
 ║  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐              ║
 ║  │ CPU 45% │ │ RAM 62% │ │Disk 73% │ │ Online  │              ║

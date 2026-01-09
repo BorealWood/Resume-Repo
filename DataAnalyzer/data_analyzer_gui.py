@@ -91,6 +91,9 @@ class SystemMonitorApp:
         self.root.geometry("1280x800")
         self.root.minsize(1024, 600)
         
+        # Initialize status_var early (needed by tab creation methods)
+        self.status_var = tk.StringVar(value="Initializing...")
+        
         # Configure styles
         self.setup_styles()
         
@@ -215,7 +218,7 @@ class SystemMonitorApp:
             insertbackground=ModernStyle.FG_PRIMARY
         )
         self.system_info_text.pack(fill=tk.BOTH, expand=True)
-        self.load_system_info()
+        self.root.after(100, self.load_system_info)
         
         # Quick Stats Panel
         stats_frame = ttk.LabelFrame(bottom, text="Quick Statistics", padding=15)
@@ -228,7 +231,7 @@ class SystemMonitorApp:
         self.stats_tree.column("Metric", width=200)
         self.stats_tree.column("Value", width=150)
         self.stats_tree.pack(fill=tk.BOTH, expand=True)
-        self.load_quick_stats()
+        self.root.after(150, self.load_quick_stats)
     
     def create_processes_tab(self):
         """Create processes management tab"""
@@ -272,7 +275,8 @@ class SystemMonitorApp:
         self.process_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y, pady=10)
         
-        self.load_processes()
+        # Delay loading until main loop starts
+        self.root.after(100, self.load_processes)
     
     def create_network_tab(self):
         """Create network analysis tab"""
@@ -290,7 +294,7 @@ class SystemMonitorApp:
             self.interface_tree.heading(col, text=col)
             self.interface_tree.column(col, width=150)
         self.interface_tree.pack(fill=tk.X)
-        self.load_network_interfaces()
+        self.root.after(200, self.load_network_interfaces)
         
         # Bottom section
         bottom = ttk.Frame(tab, style="Main.TFrame")
@@ -353,7 +357,7 @@ class SystemMonitorApp:
             self.disk_tree.column(col, width=100)
         self.disk_tree.column("Drive", width=60)
         self.disk_tree.pack(fill=tk.X)
-        self.load_disk_info()
+        self.root.after(250, self.load_disk_info)
         
         # Folder analyzer
         analyzer_frame = ttk.LabelFrame(tab, text="Folder Size Analyzer", padding=10)
@@ -482,9 +486,9 @@ class SystemMonitorApp:
     
     # Data loading methods
     def load_system_info(self):
-        """Load system information"""
-        self.system_info_text.delete(1.0, tk.END)
-        info = f"""
+        """Load system information in background thread"""
+        def load_in_thread():
+            info = f"""
 ╔══════════════════════════════════════════════════════════╗
 ║                    SYSTEM INFORMATION                     ║
 ╚══════════════════════════════════════════════════════════╝
@@ -496,132 +500,203 @@ class SystemMonitorApp:
   Processor:        {platform.processor()}
   Python Version:   {platform.python_version()}
 """
-        if PSUTIL_AVAILABLE:
-            info += f"""
+            if PSUTIL_AVAILABLE:
+                try:
+                    cpu_freq = psutil.cpu_freq()
+                    freq_str = f"{cpu_freq.current:.0f} MHz" if cpu_freq else "N/A"
+                    info += f"""
   CPU Cores:        {psutil.cpu_count(logical=False)} physical, {psutil.cpu_count()} logical
-  CPU Frequency:    {psutil.cpu_freq().current:.0f} MHz
+  CPU Frequency:    {freq_str}
   
   Total RAM:        {psutil.virtual_memory().total / (1024**3):.1f} GB
   Boot Time:        {datetime.datetime.fromtimestamp(psutil.boot_time()).strftime('%Y-%m-%d %H:%M')}
 """
-        self.system_info_text.insert(1.0, info)
+                except Exception:
+                    pass
+            
+            def update_ui():
+                try:
+                    self.system_info_text.delete(1.0, tk.END)
+                    self.system_info_text.insert(1.0, info)
+                except Exception:
+                    pass
+            
+            self.root.after(0, update_ui)
+        
+        threading.Thread(target=load_in_thread, daemon=True).start()
     
     def load_quick_stats(self):
-        """Load quick statistics"""
-        self.stats_tree.delete(*self.stats_tree.get_children())
+        """Load quick statistics in background thread"""
+        def load_in_thread():
+            stats = [
+                ("Platform", platform.system()),
+                ("Hostname", socket.gethostname()),
+                ("Python Version", platform.python_version()),
+            ]
+            
+            if PSUTIL_AVAILABLE:
+                try:
+                    stats.extend([
+                        ("Running Processes", str(len(psutil.pids()))),
+                        ("CPU Cores", str(psutil.cpu_count())),
+                        ("Network Interfaces", str(len(psutil.net_if_addrs()))),
+                        ("Disk Partitions", str(len(psutil.disk_partitions()))),
+                    ])
+                except Exception:
+                    pass
+            
+            def update_ui():
+                try:
+                    self.stats_tree.delete(*self.stats_tree.get_children())
+                    for metric, value in stats:
+                        self.stats_tree.insert("", tk.END, values=(metric, value))
+                except Exception:
+                    pass
+            
+            self.root.after(0, update_ui)
         
-        stats = [
-            ("Platform", platform.system()),
-            ("Hostname", socket.gethostname()),
-            ("Python Version", platform.python_version()),
-        ]
-        
-        if PSUTIL_AVAILABLE:
-            stats.extend([
-                ("Running Processes", str(len(psutil.pids()))),
-                ("CPU Cores", str(psutil.cpu_count())),
-                ("Network Interfaces", str(len(psutil.net_if_addrs()))),
-                ("Disk Partitions", str(len(psutil.disk_partitions()))),
-            ])
-        
-        for metric, value in stats:
-            self.stats_tree.insert("", tk.END, values=(metric, value))
+        threading.Thread(target=load_in_thread, daemon=True).start()
     
     def load_processes(self):
-        """Load process list"""
-        self.process_tree.delete(*self.process_tree.get_children())
-        
-        if not PSUTIL_AVAILABLE:
-            self.process_tree.insert("", tk.END, values=("psutil not installed", "", "", "", "", ""))
-            return
-        
-        processes = []
-        for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_info', 'num_threads', 'status']):
+        """Load process list in background thread"""
+        def load_in_thread():
+            if not PSUTIL_AVAILABLE:
+                self.root.after(0, lambda: self.process_tree.insert("", tk.END, values=("psutil not installed", "", "", "", "", "")))
+                return
+            
+            processes = []
             try:
-                info = proc.info
-                processes.append((
-                    info['name'],
-                    info['pid'],
-                    info['cpu_percent'] or 0,
-                    info['memory_info'].rss / (1024*1024) if info['memory_info'] else 0,
-                    info['num_threads'],
-                    info['status']
-                ))
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_info', 'num_threads', 'status']):
+                    try:
+                        info = proc.info
+                        processes.append((
+                            info['name'],
+                            info['pid'],
+                            info['cpu_percent'] or 0,
+                            info['memory_info'].rss / (1024*1024) if info['memory_info'] else 0,
+                            info['num_threads'],
+                            info['status']
+                        ))
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        pass
+            except Exception:
                 pass
+            
+            # Sort
+            sort_key = self.sort_var.get() if hasattr(self, 'sort_var') else "cpu"
+            sort_idx = {"name": 0, "pid": 1, "cpu": 2, "memory": 3}.get(sort_key, 0)
+            processes.sort(key=lambda x: x[sort_idx], reverse=(sort_key in ["cpu", "memory"]))
+            
+            # Update UI on main thread
+            def update_ui():
+                try:
+                    self.process_tree.delete(*self.process_tree.get_children())
+                    for proc in processes[:100]:  # Limit to 100 for performance
+                        self.process_tree.insert("", tk.END, values=(
+                            proc[0], proc[1], f"{proc[2]:.1f}", f"{proc[3]:.1f}", proc[4], proc[5]
+                        ))
+                    self.status_var.set(f"Loaded {len(processes)} processes")
+                except Exception:
+                    pass
+            
+            self.root.after(0, update_ui)
         
-        # Sort
-        sort_key = self.sort_var.get()
-        sort_idx = {"name": 0, "pid": 1, "cpu": 2, "memory": 3}.get(sort_key, 0)
-        processes.sort(key=lambda x: x[sort_idx], reverse=(sort_key in ["cpu", "memory"]))
-        
-        for proc in processes[:200]:  # Limit to 200
-            self.process_tree.insert("", tk.END, values=(
-                proc[0], proc[1], f"{proc[2]:.1f}", f"{proc[3]:.1f}", proc[4], proc[5]
-            ))
-        
-        self.status_var.set(f"Loaded {len(processes)} processes")
+        threading.Thread(target=load_in_thread, daemon=True).start()
     
     def load_network_interfaces(self):
-        """Load network interfaces"""
-        self.interface_tree.delete(*self.interface_tree.get_children())
-        
-        if not PSUTIL_AVAILABLE:
-            return
-        
-        addrs = psutil.net_if_addrs()
-        stats = psutil.net_if_stats()
-        
-        for name, addr_list in addrs.items():
-            stat = stats.get(name)
-            ipv4 = next((a.address for a in addr_list 
-                        if a.family == socket.AF_INET), "--")
-            mac = next((a.address for a in addr_list 
-                       if a.family == psutil.AF_LINK), "--")
+        """Load network interfaces in background"""
+        def load_in_thread():
+            if not PSUTIL_AVAILABLE:
+                return
             
-            self.interface_tree.insert("", tk.END, values=(
-                name,
-                "Up" if stat and stat.isup else "Down",
-                stat.speed if stat else 0,
-                f"{stat.speed} Mbps" if stat else "--",
-                ipv4,
-                mac
-            ))
+            try:
+                addrs = psutil.net_if_addrs()
+                stats = psutil.net_if_stats()
+                
+                interfaces = []
+                for name, addr_list in addrs.items():
+                    stat = stats.get(name)
+                    ipv4 = next((a.address for a in addr_list 
+                                if a.family == socket.AF_INET), "--")
+                    mac = next((a.address for a in addr_list 
+                               if a.family == psutil.AF_LINK), "--")
+                    
+                    interfaces.append((
+                        name,
+                        "Up" if stat and stat.isup else "Down",
+                        stat.speed if stat else 0,
+                        f"{stat.speed} Mbps" if stat else "--",
+                        ipv4,
+                        mac
+                    ))
+                
+                def update_ui():
+                    try:
+                        self.interface_tree.delete(*self.interface_tree.get_children())
+                        for iface in interfaces:
+                            self.interface_tree.insert("", tk.END, values=iface)
+                    except Exception:
+                        pass
+                
+                self.root.after(0, update_ui)
+            except Exception:
+                pass
+        
+        threading.Thread(target=load_in_thread, daemon=True).start()
     
     def load_disk_info(self):
-        """Load disk information"""
-        self.disk_tree.delete(*self.disk_tree.get_children())
-        
-        if not PSUTIL_AVAILABLE:
-            return
-        
-        for part in psutil.disk_partitions():
+        """Load disk information in background"""
+        def load_in_thread():
+            if not PSUTIL_AVAILABLE:
+                return
+            
+            disks = []
             try:
-                usage = psutil.disk_usage(part.mountpoint)
-                percent = usage.percent
-                
-                self.disk_tree.insert("", tk.END, values=(
-                    part.device,
-                    part.mountpoint,
-                    part.fstype,
-                    part.fstype,
-                    self.format_bytes(usage.total),
-                    self.format_bytes(usage.free),
-                    self.format_bytes(usage.used),
-                    f"{percent:.1f}%"
-                ))
-            except (PermissionError, OSError):
+                for part in psutil.disk_partitions():
+                    try:
+                        usage = psutil.disk_usage(part.mountpoint)
+                        percent = usage.percent
+                        
+                        disks.append((
+                            part.device,
+                            part.mountpoint,
+                            part.fstype,
+                            part.fstype,
+                            self.format_bytes(usage.total),
+                            self.format_bytes(usage.free),
+                            self.format_bytes(usage.used),
+                            f"{percent:.1f}%"
+                        ))
+                    except (PermissionError, OSError):
+                        pass
+            except Exception:
                 pass
+            
+            def update_ui():
+                try:
+                    self.disk_tree.delete(*self.disk_tree.get_children())
+                    for disk in disks:
+                        self.disk_tree.insert("", tk.END, values=disk)
+                except Exception:
+                    pass
+            
+            self.root.after(0, update_ui)
+        
+        threading.Thread(target=load_in_thread, daemon=True).start()
     
     # Monitoring
     def start_monitoring(self):
         """Start background monitoring"""
         def monitor():
+            # Initialize CPU percent (first call returns 0)
+            if PSUTIL_AVAILABLE:
+                psutil.cpu_percent(interval=None)
+            
             while self.monitoring:
                 try:
                     if PSUTIL_AVAILABLE:
-                        # CPU
-                        cpu = psutil.cpu_percent(interval=1)
+                        # CPU - use non-blocking call
+                        cpu = psutil.cpu_percent(interval=None)
                         self.root.after(0, lambda c=cpu: self.cpu_card.update(
                             f"{c:.0f}%", f"{psutil.cpu_count()} cores", c))
                         
@@ -633,11 +708,14 @@ class SystemMonitorApp:
                             m.percent))
                         
                         # Disk
-                        disk = psutil.disk_usage('/')
-                        self.root.after(0, lambda d=disk: self.disk_card.update(
-                            f"{d.percent:.0f}%",
-                            f"{d.free/(1024**3):.1f} GB free",
-                            d.percent))
+                        try:
+                            disk = psutil.disk_usage('/')
+                            self.root.after(0, lambda d=disk: self.disk_card.update(
+                                f"{d.percent:.0f}%",
+                                f"{d.free/(1024**3):.1f} GB free",
+                                d.percent))
+                        except Exception:
+                            pass
                         
                         # Network
                         net = psutil.net_io_counters()
@@ -645,8 +723,13 @@ class SystemMonitorApp:
                             "Online",
                             f"↑ {n.bytes_sent/(1024**2):.1f} MB | ↓ {n.bytes_recv/(1024**2):.1f} MB",
                             50))
+                    
+                    # Sleep between updates (2 seconds)
+                    import time
+                    time.sleep(2)
                 except Exception as e:
-                    pass
+                    import time
+                    time.sleep(2)
         
         self.monitor_thread = threading.Thread(target=monitor, daemon=True)
         self.monitor_thread.start()

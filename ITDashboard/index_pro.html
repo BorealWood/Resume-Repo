@@ -847,6 +847,149 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+
+        /* Data Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background: rgba(255, 255, 255, 0.02);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-badge.running {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .status-badge.running::before {
+            background: var(--success);
+            box-shadow: 0 0 6px var(--success);
+        }
+
+        .status-badge.stopped {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .status-badge.stopped::before {
+            background: var(--danger);
+        }
+
+        .status-badge.warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .status-badge.warning::before {
+            background: var(--warning);
+            box-shadow: 0 0 6px var(--warning);
+        }
+
+        /* Selected Row */
+        .selected-row {
+            background: rgba(99, 102, 241, 0.1) !important;
+        }
+
+        .selected-row:hover {
+            background: rgba(99, 102, 241, 0.15) !important;
+        }
+
+        /* Log Entries */
+        .log-entry {
+            display: flex;
+            gap: 15px;
+            padding: 10px 15px;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .log-entry:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .log-time {
+            color: var(--text-secondary);
+            min-width: 150px;
+        }
+
+        .log-level {
+            font-weight: 600;
+            min-width: 70px;
+        }
+
+        .log-level.info { color: var(--info); }
+        .log-level.warning { color: var(--warning); }
+        .log-level.error { color: var(--danger); }
+
+        .log-message {
+            color: var(--text-primary);
+        }
+
+        /* Section Containers */
+        .section-container {
+            display: none;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Glass Card Helper */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+        }
     </style>
 </head>
 <body>
@@ -1225,6 +1368,274 @@
                 </div>
             </div>
         </section>
+
+        <!-- Processes Section -->
+        <section id="processes-section" style="display: none;">
+            <!-- Process Stats Cards -->
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
+                <div class="stat-card cpu" style="padding: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Total Processes</div>
+                            <div id="pm-total-processes" style="font-size: 1.5rem; font-weight: 700;">0</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-list"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card memory" style="padding: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Running</div>
+                            <div id="pm-running" style="font-size: 1.5rem; font-weight: 700; color: var(--success);">0</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-play"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card disk" style="padding: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Total CPU</div>
+                            <div id="pm-total-cpu" style="font-size: 1.5rem; font-weight: 700;">0%</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-microchip"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card network" style="padding: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Memory Used</div>
+                            <div id="pm-total-mem" style="font-size: 1.5rem; font-weight: 700;">0 MB</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-memory"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-microchip"></i>
+                        Process Manager
+                    </div>
+                    <div class="card-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input type="text" class="tool-input" id="process-search" placeholder="Search processes..." style="width: 200px;" oninput="filterProcesses()">
+                        <select class="tool-input" id="process-sort" style="width: 130px;" onchange="sortProcessTable()">
+                            <option value="cpu-desc">CPU ↓</option>
+                            <option value="cpu-asc">CPU ↑</option>
+                            <option value="memory-desc">Memory ↓</option>
+                            <option value="memory-asc">Memory ↑</option>
+                            <option value="name-asc">Name A-Z</option>
+                            <option value="name-desc">Name Z-A</option>
+                            <option value="pid-asc">PID ↑</option>
+                            <option value="pid-desc">PID ↓</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="refreshProcessTable()" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="btn btn-primary" onclick="showNewProcessModal()" title="New Process">
+                            <i class="fas fa-plus"></i> New
+                        </button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto; max-height: 500px; overflow-y: auto;">
+                    <table class="data-table">
+                        <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1;">
+                            <tr>
+                                <th style="width: 50px;"><input type="checkbox" id="select-all-processes" onchange="toggleAllProcesses(this.checked)"></th>
+                                <th>PID</th>
+                                <th>Name</th>
+                                <th>User</th>
+                                <th>CPU %</th>
+                                <th>Memory</th>
+                                <th>Threads</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th style="text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="process-table-body">
+                        </tbody>
+                    </table>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-top: 1px solid var(--border-color); margin-top: 15px;">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="killSelectedProcesses()" id="kill-selected-btn" disabled>
+                            <i class="fas fa-times"></i> End Selected (<span id="selected-count">0</span>)
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportProcessList()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.85rem;">
+                        <span id="pm-showing">Showing 0</span> of <span id="pm-total">0</span> processes
+                        <span style="margin-left: 15px;">Auto-refresh: <span id="pm-auto-status" style="color: var(--success);">ON</span></span>
+                        <button class="btn btn-sm" style="margin-left: 10px; padding: 4px 8px;" onclick="toggleProcessAutoRefresh()">
+                            <i class="fas fa-pause" id="pm-auto-icon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- New Process Modal -->
+        <div class="modal-overlay" id="new-process-modal">
+            <div class="modal" style="max-width: 400px;">
+                <div class="modal-header">
+                    <h2><i class="fas fa-plus" style="color: var(--success);"></i> Run New Process</h2>
+                    <button class="modal-close" onclick="closeModal('new-process-modal')">&times;</button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">Process Name</label>
+                        <input type="text" class="tool-input" id="new-process-name" placeholder="e.g., myapp.exe" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">Priority</label>
+                        <select class="tool-input" id="new-process-priority" style="width: 100%;">
+                            <option value="Normal">Normal</option>
+                            <option value="High">High</option>
+                            <option value="Low">Low</option>
+                            <option value="Realtime">Realtime</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">Run as User</label>
+                        <select class="tool-input" id="new-process-user" style="width: 100%;">
+                            <option value="admin">admin</option>
+                            <option value="system">SYSTEM</option>
+                            <option value="user">user</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+                        <button class="btn btn-secondary" onclick="closeModal('new-process-modal')">Cancel</button>
+                        <button class="btn btn-primary" onclick="startNewProcess()"><i class="fas fa-play"></i> Run</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Process Details Modal -->
+        <div class="modal-overlay" id="process-details-modal">
+            <div class="modal" style="max-width: 550px;">
+                <div class="modal-header">
+                    <h2><i class="fas fa-info-circle" style="color: var(--info);"></i> Process Details</h2>
+                    <button class="modal-close" onclick="closeModal('process-details-modal')">&times;</button>
+                </div>
+                <div id="process-details-content">
+                    <!-- Content populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Section -->
+        <section id="services-section" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-server"></i>
+                        Service Manager
+                    </div>
+                    <div class="card-actions">
+                        <select class="tool-input" id="service-filter" style="width: 150px;" onchange="filterServices()">
+                            <option value="all">All Services</option>
+                            <option value="running">Running</option>
+                            <option value="stopped">Stopped</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="refreshServicesTable()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <th style="text-align: left; padding: 12px; color: var(--text-secondary); font-weight: 600;">Service</th>
+                                <th style="text-align: left; padding: 12px; color: var(--text-secondary); font-weight: 600;">Description</th>
+                                <th style="text-align: left; padding: 12px; color: var(--text-secondary); font-weight: 600;">Status</th>
+                                <th style="text-align: left; padding: 12px; color: var(--text-secondary); font-weight: 600;">Startup</th>
+                                <th style="text-align: center; padding: 12px; color: var(--text-secondary); font-weight: 600;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="services-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Logs Section -->
+        <section id="logs-section" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-file-alt"></i>
+                        System Logs
+                    </div>
+                    <div class="card-actions">
+                        <select class="tool-input" id="log-type" style="width: 150px;" onchange="loadLogs()">
+                            <option value="system">System</option>
+                            <option value="application">Application</option>
+                            <option value="security">Security</option>
+                            <option value="network">Network</option>
+                        </select>
+                        <select class="tool-input" id="log-level" style="width: 120px;" onchange="loadLogs()">
+                            <option value="all">All Levels</option>
+                            <option value="error">Error</option>
+                            <option value="warning">Warning</option>
+                            <option value="info">Info</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="loadLogs()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="btn btn-primary" onclick="exportLogs()">
+                            <i class="fas fa-download"></i>
+                            Export
+                        </button>
+                    </div>
+                </div>
+                <div class="tool-output" id="logs-output" style="height: 400px; font-size: 0.8rem;">
+                    <span class="info">Loading logs...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Network Section -->
+        <section id="network-section" style="display: none;">
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-network-wired"></i>
+                        Network Interfaces
+                    </div>
+                </div>
+                <div id="network-interfaces" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-exchange-alt"></i>
+                        Active Connections
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <th style="text-align: left; padding: 12px; color: var(--text-secondary);">Protocol</th>
+                                <th style="text-align: left; padding: 12px; color: var(--text-secondary);">Local Address</th>
+                                <th style="text-align: left; padding: 12px; color: var(--text-secondary);">Remote Address</th>
+                                <th style="text-align: left; padding: 12px; color: var(--text-secondary);">State</th>
+                                <th style="text-align: left; padding: 12px; color: var(--text-secondary);">PID</th>
+                            </tr>
+                        </thead>
+                        <tbody id="connections-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- About Modal -->
@@ -1244,6 +1655,155 @@
                     A comprehensive real-time system monitoring and network management dashboard.
                     Built with HTML5, CSS3, and JavaScript.
                 </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-cog" style="color: var(--primary);"></i> Settings</h2>
+                <button class="modal-close" onclick="closeModal('settings-modal')">&times;</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- Appearance -->
+                <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <h4 style="margin-bottom: 15px; color: var(--text-secondary);"><i class="fas fa-palette"></i> Appearance</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span>Theme</span>
+                        <select class="tool-input" id="theme-select" style="width: 150px;" onchange="changeTheme(this.value)">
+                            <option value="dark">Dark (Default)</option>
+                            <option value="light">Light</option>
+                            <option value="midnight">Midnight Blue</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Accent Color</span>
+                        <input type="color" id="accent-color" value="#6366f1" style="width: 50px; height: 30px; border: none; cursor: pointer;" onchange="changeAccent(this.value)">
+                    </div>
+                </div>
+                
+                <!-- Refresh Rate -->
+                <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <h4 style="margin-bottom: 15px; color: var(--text-secondary);"><i class="fas fa-sync-alt"></i> Monitoring</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span>Refresh Rate</span>
+                        <select class="tool-input" id="refresh-rate" style="width: 150px;" onchange="setRefreshRate(this.value)">
+                            <option value="1000">1 second</option>
+                            <option value="2000" selected>2 seconds</option>
+                            <option value="5000">5 seconds</option>
+                            <option value="10000">10 seconds</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Auto-refresh</span>
+                        <label style="position: relative; display: inline-block; width: 50px; height: 26px;">
+                            <input type="checkbox" id="auto-refresh" checked style="opacity: 0; width: 0; height: 0;" onchange="toggleAutoRefresh(this.checked)">
+                            <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); border-radius: 26px; transition: 0.3s;"></span>
+                            <span id="toggle-slider" style="position: absolute; content: ''; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; transform: translateX(24px);"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Notifications -->
+                <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <h4 style="margin-bottom: 15px; color: var(--text-secondary);"><i class="fas fa-bell"></i> Notifications</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span>CPU Alert Threshold</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="range" id="cpu-threshold" min="50" max="100" value="80" style="width: 100px;" oninput="document.getElementById('cpu-threshold-val').textContent = this.value + '%'">
+                            <span id="cpu-threshold-val">80%</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Memory Alert Threshold</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="range" id="mem-threshold" min="50" max="100" value="85" style="width: 100px;" oninput="document.getElementById('mem-threshold-val').textContent = this.value + '%'">
+                            <span id="mem-threshold-val">85%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="resetSettings()">Reset to Default</button>
+                    <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Speed Test Modal -->
+    <div class="modal-overlay" id="speedtest-modal">
+        <div class="modal" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-tachometer-alt" style="color: var(--primary);"></i> Speed Test</h2>
+                <button class="modal-close" onclick="closeModal('speedtest-modal')">&times;</button>
+            </div>
+            <div style="text-align: center; padding: 20px 0;">
+                <!-- Progress Bar -->
+                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; height: 8px; margin-bottom: 25px; overflow: hidden;">
+                    <div id="st-progress" style="height: 100%; background: linear-gradient(90deg, var(--primary), var(--info)); border-radius: 10px; width: 0%; transition: width 0.3s ease;"></div>
+                </div>
+                
+                <!-- Results Grid -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px;">
+                    <div style="padding: 15px; background: rgba(255,255,255,0.02); border-radius: 12px;">
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 5px;">PING</div>
+                        <div id="st-ping" style="font-size: 1.5rem; font-weight: 700; color: var(--success);">--</div>
+                    </div>
+                    <div style="padding: 15px; background: rgba(255,255,255,0.02); border-radius: 12px;">
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 5px;">DOWNLOAD</div>
+                        <div id="st-download" style="font-size: 1.5rem; font-weight: 700; color: var(--info);">--</div>
+                    </div>
+                    <div style="padding: 15px; background: rgba(255,255,255,0.02); border-radius: 12px;">
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 5px;">UPLOAD</div>
+                        <div id="st-upload" style="font-size: 1.5rem; font-weight: 700; color: var(--warning);">--</div>
+                    </div>
+                </div>
+                
+                <!-- Status -->
+                <div id="st-status" style="color: var(--text-secondary); font-size: 0.9rem;">Initializing...</div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                <button class="btn btn-secondary" onclick="runSpeedTestAnimation()"><i class="fas fa-redo"></i> Run Again</button>
+                <button class="btn btn-primary" onclick="closeModal('speedtest-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cache Clear Modal -->
+    <div class="modal-overlay" id="cache-modal">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-broom" style="color: var(--warning);"></i> Clear Cache</h2>
+                <button class="modal-close" onclick="closeModal('cache-modal')">&times;</button>
+            </div>
+            <div style="padding: 20px 0;">
+                <!-- Progress Bar -->
+                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; height: 8px; margin-bottom: 20px; overflow: hidden;">
+                    <div id="cache-progress" style="height: 100%; background: linear-gradient(90deg, var(--warning), var(--success)); border-radius: 10px; width: 0%; transition: width 0.3s ease;"></div>
+                </div>
+                
+                <!-- Stats -->
+                <div style="display: flex; justify-content: space-around; margin-bottom: 20px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--success);" id="cache-freed">0 MB</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Space Freed</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--info);" id="cache-items">0</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Files Removed</div>
+                    </div>
+                </div>
+                
+                <!-- Status -->
+                <div id="cache-status" style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">Preparing...</div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                <button class="btn btn-secondary" onclick="runCacheClearAnimation()"><i class="fas fa-redo"></i> Clear Again</button>
+                <button class="btn btn-primary" onclick="closeModal('cache-modal')">Close</button>
             </div>
         </div>
     </div>
@@ -1286,62 +1846,71 @@
             }).join('');
         }
 
-        // Process list
+        // Process list - calls updateProcessList
         function initializeProcesses() {
-            const processes = [
-                { name: 'Chrome', icon: 'fab fa-chrome', color: '#4285f4', cpu: 12.5, memory: 2048 },
-                { name: 'VS Code', icon: 'fas fa-code', color: '#007acc', cpu: 8.3, memory: 1536 },
-                { name: 'Node.js', icon: 'fab fa-node-js', color: '#339933', cpu: 5.2, memory: 512 },
-                { name: 'Docker', icon: 'fab fa-docker', color: '#2496ed', cpu: 3.8, memory: 1024 },
-                { name: 'Slack', icon: 'fab fa-slack', color: '#4a154b', cpu: 2.1, memory: 768 },
-            ];
-
-            const container = document.getElementById('process-list');
-            container.innerHTML = processes.map(p => `
-                <div class="process-item">
-                    <div class="process-icon" style="background: ${p.color}20; color: ${p.color};">
-                        <i class="${p.icon}"></i>
-                    </div>
-                    <div class="process-info">
-                        <div class="process-name">${p.name}</div>
-                        <div class="process-meta">PID: ${Math.floor(Math.random() * 10000)}</div>
-                    </div>
-                    <div class="process-stats">
-                        <div class="process-cpu">${p.cpu}%</div>
-                        <div class="process-memory">${p.memory} MB</div>
-                    </div>
-                </div>
-            `).join('');
+            updateProcessList();
         }
 
-        // Services
-        function initializeServices() {
-            const services = [
-                { name: 'Web Server', icon: 'fas fa-globe', color: '#3b82f6', status: 'online' },
-                { name: 'Database', icon: 'fas fa-database', color: '#22c55e', status: 'online' },
-                { name: 'Redis Cache', icon: 'fas fa-bolt', color: '#ef4444', status: 'online' },
-                { name: 'Mail Server', icon: 'fas fa-envelope', color: '#f59e0b', status: 'warning' },
-                { name: 'Backup', icon: 'fas fa-cloud-upload-alt', color: '#8b5cf6', status: 'online' },
-                { name: 'Monitoring', icon: 'fas fa-chart-line', color: '#06b6d4', status: 'online' },
-            ];
+        // Services - Store state globally
+        const dashboardServices = [
+            { name: 'Web Server', icon: 'fas fa-globe', color: '#3b82f6', status: 'online' },
+            { name: 'Database', icon: 'fas fa-database', color: '#22c55e', status: 'online' },
+            { name: 'Redis Cache', icon: 'fas fa-bolt', color: '#ef4444', status: 'online' },
+            { name: 'Mail Server', icon: 'fas fa-envelope', color: '#f59e0b', status: 'warning' },
+            { name: 'Backup', icon: 'fas fa-cloud-upload-alt', color: '#8b5cf6', status: 'online' },
+            { name: 'Monitoring', icon: 'fas fa-chart-line', color: '#06b6d4', status: 'online' },
+        ];
 
+        function initializeServices() {
+            renderDashboardServices();
+        }
+
+        function renderDashboardServices() {
             const container = document.getElementById('services-grid');
-            container.innerHTML = services.map(s => `
-                <div class="service-card">
-                    <div class="service-icon" style="background: ${s.color}20; color: ${s.color};">
-                        <i class="${s.icon}"></i>
+            if (!container) return;
+            
+            container.innerHTML = dashboardServices.map((s, index) => {
+                const statusText = s.status === 'online' ? 'Running' : 
+                                   s.status === 'warning' ? 'Warning' : 'Stopped';
+                return `
+                    <div class="service-card" onclick="toggleDashboardService(${index})" style="cursor: pointer;">
+                        <div class="service-icon" style="background: ${s.color}20; color: ${s.color};">
+                            <i class="${s.icon}"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600;">${s.name}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">${statusText}</div>
+                        </div>
+                        <div class="service-status ${s.status}"></div>
                     </div>
-                    <div>
-                        <div style="font-weight: 600;">${s.name}</div>
-                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Running</div>
-                    </div>
-                    <div class="service-status ${s.status}"></div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+        }
+
+        function toggleDashboardService(index) {
+            const service = dashboardServices[index];
+            if (service.status === 'online') {
+                service.status = 'offline';
+            } else if (service.status === 'offline') {
+                service.status = 'online';
+            } else if (service.status === 'warning') {
+                service.status = 'online';
+            }
+            renderDashboardServices();
         }
 
         // Live monitoring
         function startMonitoring() {
+            // Update processes dynamically
+            setInterval(() => {
+                updateProcessList();
+            }, 5000);
+            
+            // Update chart periodically
+            setInterval(() => {
+                updateNetworkChart();
+            }, 10000);
+            
             setInterval(() => {
                 // CPU
                 systemData.cpu = Math.max(5, Math.min(95, systemData.cpu + (Math.random() - 0.5) * 10));
@@ -1369,6 +1938,84 @@
                 document.getElementById('latency').textContent = `${latency}ms latency`;
 
             }, 2000);
+        }
+
+        // Update processes with varying values
+        function updateProcessList() {
+            const processes = [
+                { name: 'Chrome', icon: 'fab fa-chrome', color: '#4285f4' },
+                { name: 'VS Code', icon: 'fas fa-code', color: '#007acc' },
+                { name: 'Node.js', icon: 'fab fa-node-js', color: '#339933' },
+                { name: 'Docker', icon: 'fab fa-docker', color: '#2496ed' },
+                { name: 'Slack', icon: 'fab fa-slack', color: '#4a154b' },
+            ];
+
+            const container = document.getElementById('process-list');
+            if (!container) return;
+            
+            container.innerHTML = processes.map(p => {
+                const cpu = (Math.random() * 15 + 1).toFixed(1);
+                const memory = Math.floor(Math.random() * 2000 + 200);
+                return `
+                    <div class="process-item">
+                        <div class="process-icon" style="background: ${p.color}20; color: ${p.color};">
+                            <i class="${p.icon}"></i>
+                        </div>
+                        <div class="process-info">
+                            <div class="process-name">${p.name}</div>
+                            <div class="process-meta">PID: ${Math.floor(Math.random() * 10000)}</div>
+                        </div>
+                        <div class="process-stats">
+                            <div class="process-cpu">${cpu}%</div>
+                            <div class="process-memory">${memory} MB</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Refresh processes button handler
+        function refreshProcesses() {
+            updateProcessList();
+            // Show brief feedback
+            const btn = event.currentTarget;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+            }, 1000);
+        }
+
+        // Update network chart with animation
+        function updateNetworkChart() {
+            const container = document.getElementById('network-chart');
+            if (!container) return;
+            
+            const bars = container.querySelectorAll('.chart-bar');
+            bars.forEach(bar => {
+                if (bar.classList.contains('upload')) {
+                    const newHeight = Math.random() * 60 + 20;
+                    bar.style.height = newHeight + '%';
+                    bar.title = `Upload: ${Math.floor(newHeight)}%`;
+                } else if (bar.classList.contains('download')) {
+                    const newHeight = Math.random() * 70 + 30;
+                    bar.style.height = newHeight + '%';
+                    bar.title = `Download: ${Math.floor(newHeight)}%`;
+                }
+            });
+        }
+
+        // Toggle chart view
+        let chartExpanded = false;
+        function toggleChartView() {
+            const chartContainer = document.querySelector('.chart-container');
+            if (!chartContainer) return;
+            
+            chartExpanded = !chartExpanded;
+            if (chartExpanded) {
+                chartContainer.style.height = '400px';
+            } else {
+                chartContainer.style.height = '200px';
+            }
         }
 
         // Navigation
@@ -1461,43 +2108,331 @@
         }
 
         // Terminal
+        const terminalHistory = [];
+        let historyIndex = -1;
+        
         function executeCommand() {
             const input = document.getElementById('terminal-input');
             const output = document.getElementById('terminal-output');
             const command = input.value.trim();
+            
+            if (command) {
+                terminalHistory.unshift(command);
+                historyIndex = -1;
+            }
 
             output.innerHTML += `<div class="terminal-line"><span class="terminal-prompt">user@dashboard:~$</span> <span class="terminal-command">${command}</span></div>`;
 
+            // Parse command and arguments
+            const parts = command.split(' ');
+            const cmd = parts[0].toLowerCase();
+            const args = parts.slice(1);
+
+            // Command implementations
             const commands = {
-                'help': 'Available commands: help, clear, date, whoami, uptime, neofetch, ping, ps, df',
-                'clear': 'CLEAR',
-                'date': new Date().toString(),
-                'whoami': 'admin@it-dashboard',
-                'uptime': '15 days, 4:23:45',
-                'neofetch': `
-                    ██████████████████  IT Dashboard Pro v2.0
-                    ██████████████████  ─────────────────────
-                    ██████████████████  OS: Dashboard Linux
-                    ██████████████████  Host: Eyasu Solomon
-                    ██████████████████  Kernel: 5.15.0-dashboard
-                    ██████████████████  Uptime: 15 days
-                    ██████████████████  Shell: dash-sh
-                    ██████████████████  Terminal: Web Terminal`,
-                'ps': 'PID   NAME            CPU    MEM\n1234  chrome          12.5%  2.0GB\n2345  vscode          8.3%   1.5GB\n3456  node            5.2%   512MB',
-                'df': 'Filesystem      Size  Used  Avail  Use%\n/dev/sda1       500G  365G  135G   73%\n/dev/sdb1       1.0T  234G  766G   23%'
+                'help': () => {
+                    return `<span class="info">Available Commands:</span>
+<span class="success">  help</span>          - Show this help message
+<span class="success">  clear</span>         - Clear terminal screen
+<span class="success">  date</span>          - Display current date and time
+<span class="success">  whoami</span>        - Display current user
+<span class="success">  hostname</span>      - Display system hostname
+<span class="success">  uptime</span>        - Show system uptime
+<span class="success">  neofetch</span>      - Display system info
+<span class="success">  ps</span>            - List running processes
+<span class="success">  top</span>           - Show top processes by CPU
+<span class="success">  df</span>            - Show disk usage
+<span class="success">  free</span>          - Show memory usage
+<span class="success">  ifconfig</span>      - Show network interfaces
+<span class="success">  netstat</span>       - Show network connections
+<span class="success">  ping [host]</span>   - Ping a host
+<span class="success">  traceroute [host]</span> - Trace route to host
+<span class="success">  nslookup [domain]</span> - DNS lookup
+<span class="success">  curl [url]</span>    - Fetch URL content
+<span class="success">  echo [text]</span>   - Print text
+<span class="success">  cat [file]</span>    - Display file contents
+<span class="success">  ls</span>            - List directory contents
+<span class="success">  pwd</span>           - Print working directory
+<span class="success">  history</span>       - Show command history
+<span class="success">  cowsay [msg]</span>  - ASCII cow says message
+<span class="success">  matrix</span>        - Matrix rain effect
+<span class="success">  weather</span>       - Show weather info
+<span class="success">  joke</span>          - Tell a random joke
+<span class="success">  calc [expr]</span>   - Calculate expression`;
+                },
+                'clear': () => 'CLEAR',
+                'date': () => new Date().toString(),
+                'whoami': () => 'admin@it-dashboard',
+                'hostname': () => 'dashboard-server',
+                'uptime': () => {
+                    const days = Math.floor(Math.random() * 30) + 1;
+                    const hours = Math.floor(Math.random() * 24);
+                    const mins = Math.floor(Math.random() * 60);
+                    return `up ${days} days, ${hours}:${mins.toString().padStart(2, '0')}, 3 users, load average: 0.${Math.floor(Math.random()*99)}, 0.${Math.floor(Math.random()*99)}, 0.${Math.floor(Math.random()*99)}`;
+                },
+                'neofetch': () => `<span style="color: #6366f1;">
+       ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄</span>   <span class="info">admin@dashboard</span>
+<span style="color: #6366f1;">     ▄▀░░░░░░░░░░░░░░░░░░▀▄</span>   ──────────────────
+<span style="color: #6366f1;">    █░░░░░░░░░░░░░░░░░░░░░░█</span>   <span class="success">OS:</span> Dashboard Linux 5.15
+<span style="color: #6366f1;">   █░░░░░░░░░░░░░░░░░░░░░░░█</span>   <span class="success">Host:</span> IT Dashboard Pro
+<span style="color: #6366f1;">  █░░░░░░░░░░░░░░░░░░░░░░░░█</span>   <span class="success">Kernel:</span> 5.15.0-dashboard
+<span style="color: #6366f1;">  █░░░░░░░░░░░░░░░░░░░░░░░░█</span>   <span class="success">Uptime:</span> 15 days, 4 hours
+<span style="color: #6366f1;">  █░░░░░░░░░░░░░░░░░░░░░░░░█</span>   <span class="success">Shell:</span> dash-sh 2.0
+<span style="color: #6366f1;">   █░░░░░░░░░░░░░░░░░░░░░░█</span>   <span class="success">Terminal:</span> Web Terminal
+<span style="color: #6366f1;">    █░░░░░░░░░░░░░░░░░░░░█</span>   <span class="success">CPU:</span> Dashboard Core (4) @ 3.6GHz
+<span style="color: #6366f1;">     ▀▄░░░░░░░░░░░░░░░░▄▀</span>   <span class="success">Memory:</span> ${Math.floor(Math.random()*8+4)}GB / 16GB
+<span style="color: #6366f1;">       ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀</span>`,
+                'ps': () => {
+                    const procs = [
+                        { pid: 1, name: 'systemd', cpu: '0.0', mem: '0.1' },
+                        { pid: Math.floor(Math.random()*1000)+100, name: 'chrome', cpu: (Math.random()*15).toFixed(1), mem: (Math.random()*10).toFixed(1) },
+                        { pid: Math.floor(Math.random()*1000)+100, name: 'node', cpu: (Math.random()*8).toFixed(1), mem: (Math.random()*5).toFixed(1) },
+                        { pid: Math.floor(Math.random()*1000)+100, name: 'code', cpu: (Math.random()*10).toFixed(1), mem: (Math.random()*8).toFixed(1) },
+                        { pid: Math.floor(Math.random()*1000)+100, name: 'docker', cpu: (Math.random()*5).toFixed(1), mem: (Math.random()*4).toFixed(1) },
+                    ];
+                    return `<span class="info">  PID TTY          TIME CMD</span>
+${procs.map(p => `  ${p.pid.toString().padEnd(5)} pts/0    00:00:0${Math.floor(Math.random()*9)} ${p.name}`).join('\n')}`;
+                },
+                'top': () => {
+                    const procs = [
+                        { pid: Math.floor(Math.random()*1000)+100, user: 'admin', pr: 20, ni: 0, name: 'chrome', cpu: (Math.random()*20+5).toFixed(1), mem: (Math.random()*10+2).toFixed(1) },
+                        { pid: Math.floor(Math.random()*1000)+100, user: 'admin', pr: 20, ni: 0, name: 'node', cpu: (Math.random()*15).toFixed(1), mem: (Math.random()*8).toFixed(1) },
+                        { pid: Math.floor(Math.random()*1000)+100, user: 'admin', pr: 20, ni: 0, name: 'vscode', cpu: (Math.random()*12).toFixed(1), mem: (Math.random()*10).toFixed(1) },
+                        { pid: Math.floor(Math.random()*1000)+100, user: 'root', pr: 20, ni: 0, name: 'dockerd', cpu: (Math.random()*8).toFixed(1), mem: (Math.random()*5).toFixed(1) },
+                        { pid: Math.floor(Math.random()*1000)+100, user: 'admin', pr: 20, ni: 0, name: 'slack', cpu: (Math.random()*5).toFixed(1), mem: (Math.random()*6).toFixed(1) },
+                    ];
+                    return `<span class="info">top - ${new Date().toLocaleTimeString()} up 15 days, 3 users, load average: 0.52, 0.48, 0.45</span>
+<span class="info">Tasks: 127 total, 1 running, 126 sleeping, 0 stopped, 0 zombie</span>
+<span class="info">%Cpu(s): ${(Math.random()*30+10).toFixed(1)} us, ${(Math.random()*10).toFixed(1)} sy, 0.0 ni, ${(Math.random()*50+40).toFixed(1)} id</span>
+<span class="info">MiB Mem: 16384.0 total, ${Math.floor(Math.random()*4000+2000)} free, ${Math.floor(Math.random()*8000+4000)} used</span>
+
+<span class="success">  PID USER      PR  NI    VIRT    RES  %CPU  %MEM COMMAND</span>
+${procs.map(p => `  ${p.pid.toString().padEnd(5)} ${p.user.padEnd(8)} ${p.pr}   ${p.ni}  ${Math.floor(Math.random()*900+100)}m  ${Math.floor(Math.random()*500+50)}m  ${p.cpu.padStart(5)}  ${p.mem.padStart(4)} ${p.name}`).join('\n')}`;
+                },
+                'df': () => `<span class="info">Filesystem      Size  Used Avail Use% Mounted on</span>
+/dev/sda1       500G  ${Math.floor(Math.random()*200+200)}G  ${Math.floor(Math.random()*200+50)}G  ${Math.floor(Math.random()*40+50)}% /
+/dev/sdb1       1.0T  ${Math.floor(Math.random()*500+100)}G  ${Math.floor(Math.random()*400+200)}G  ${Math.floor(Math.random()*30+20)}% /data
+tmpfs           8.0G  ${Math.floor(Math.random()*100)}M  7.${Math.floor(Math.random()*9)}G   ${Math.floor(Math.random()*5)}% /dev/shm
+/dev/sdc1       256G  ${Math.floor(Math.random()*100+50)}G  ${Math.floor(Math.random()*150+50)}G  ${Math.floor(Math.random()*30+30)}% /backup`,
+                'free': () => {
+                    const total = 16384;
+                    const used = Math.floor(Math.random()*8000+4000);
+                    const free = total - used;
+                    const buffers = Math.floor(Math.random()*2000+500);
+                    return `<span class="info">              total        used        free      shared  buff/cache   available</span>
+Mem:          ${total}       ${used}       ${free}         ${Math.floor(Math.random()*500)}        ${buffers}       ${free + buffers}
+Swap:          8192        ${Math.floor(Math.random()*1000)}        ${8192 - Math.floor(Math.random()*1000)}`;
+                },
+                'ifconfig': () => `<span class="success">eth0:</span> flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.1.${Math.floor(Math.random()*200+10)}  netmask 255.255.255.0  broadcast 192.168.1.255
+        inet6 fe80::1  prefixlen 64  scopeid 0x20<link>
+        ether 00:1a:2b:3c:4d:5e  txqueuelen 1000  (Ethernet)
+        RX packets ${Math.floor(Math.random()*1000000)}  bytes ${Math.floor(Math.random()*1000000000)} (${(Math.random()*10).toFixed(1)} GB)
+        TX packets ${Math.floor(Math.random()*500000)}  bytes ${Math.floor(Math.random()*500000000)} (${(Math.random()*5).toFixed(1)} GB)
+
+<span class="success">lo:</span> flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        loop  txqueuelen 1000  (Local Loopback)`,
+                'netstat': () => `<span class="info">Active Internet connections (servers and established)</span>
+<span class="info">Proto Recv-Q Send-Q Local Address           Foreign Address         State</span>
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:443             0.0.0.0:*               LISTEN
+tcp        0      0 192.168.1.100:443       142.250.80.46:443       ESTABLISHED
+tcp        0      0 192.168.1.100:22        10.0.0.50:54321         ESTABLISHED
+tcp        0      0 127.0.0.1:3306          127.0.0.1:45678         ESTABLISHED`,
+                'ping': () => {
+                    const host = args[0] || 'google.com';
+                    const ip = `${Math.floor(Math.random()*200+10)}.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}`;
+                    const times = [1,2,3,4].map(() => Math.floor(Math.random()*50+5));
+                    return `PING ${host} (${ip}) 56(84) bytes of data.
+64 bytes from ${ip}: icmp_seq=1 ttl=64 time=${times[0]} ms
+64 bytes from ${ip}: icmp_seq=2 ttl=64 time=${times[1]} ms
+64 bytes from ${ip}: icmp_seq=3 ttl=64 time=${times[2]} ms
+64 bytes from ${ip}: icmp_seq=4 ttl=64 time=${times[3]} ms
+
+--- ${host} ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss
+rtt min/avg/max = ${Math.min(...times)}/${(times.reduce((a,b)=>a+b)/4).toFixed(1)}/${Math.max(...times)} ms`;
+                },
+                'traceroute': () => {
+                    const host = args[0] || 'google.com';
+                    return `traceroute to ${host}, 30 hops max, 60 byte packets
+ 1  gateway (192.168.1.1)  ${(Math.random()*5).toFixed(3)} ms
+ 2  isp-router (10.0.0.1)  ${(Math.random()*10+5).toFixed(3)} ms
+ 3  core-router (72.14.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)})  ${(Math.random()*15+10).toFixed(3)} ms
+ 4  edge-router (142.250.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)})  ${(Math.random()*20+15).toFixed(3)} ms
+ 5  ${host} (142.250.80.46)  ${(Math.random()*25+20).toFixed(3)} ms`;
+                },
+                'nslookup': () => {
+                    const domain = args[0] || 'example.com';
+                    return `Server:     8.8.8.8
+Address:    8.8.8.8#53
+
+Non-authoritative answer:
+Name:   ${domain}
+Address: ${Math.floor(Math.random()*200+10)}.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}`;
+                },
+                'curl': () => {
+                    const url = args[0] || 'https://api.example.com';
+                    return `<span class="info">HTTP/1.1 200 OK</span>
+Content-Type: application/json
+Date: ${new Date().toUTCString()}
+Server: nginx/1.18.0
+
+{
+  "status": "success",
+  "message": "Hello from ${url}",
+  "timestamp": "${new Date().toISOString()}"
+}`;
+                },
+                'echo': () => args.join(' ') || '',
+                'cat': () => {
+                    const file = args[0];
+                    const files = {
+                        '/etc/hostname': 'dashboard-server',
+                        '/etc/os-release': 'NAME="Dashboard Linux"\nVERSION="5.15"\nID=dashboard',
+                        'readme.txt': 'Welcome to IT Dashboard Pro!\nCreated by Eyasu Solomon',
+                        '.bashrc': '# ~/.bashrc\nexport PATH=$PATH:/usr/local/bin\nalias ll="ls -la"',
+                    };
+                    return files[file] || `<span style="color: var(--danger);">cat: ${file || '[no file specified]'}: No such file or directory</span>`;
+                },
+                'ls': () => {
+                    const opt = args[0];
+                    if (opt === '-la' || opt === '-l') {
+                        return `total 32
+drwxr-xr-x  5 admin admin 4096 Jan  9 10:30 <span style="color: #6366f1;">.</span>
+drwxr-xr-x  3 root  root  4096 Jan  1 00:00 <span style="color: #6366f1;">..</span>
+-rw-r--r--  1 admin admin  220 Jan  1 00:00 .bashrc
+-rw-r--r--  1 admin admin  807 Jan  1 00:00 .profile
+drwxr-xr-x  2 admin admin 4096 Jan  5 14:20 <span style="color: #22c55e;">Documents</span>
+drwxr-xr-x  2 admin admin 4096 Jan  7 09:15 <span style="color: #22c55e;">Downloads</span>
+-rw-r--r--  1 admin admin  128 Jan  9 08:00 readme.txt
+drwxr-xr-x  3 admin admin 4096 Jan  8 16:45 <span style="color: #22c55e;">Projects</span>`;
+                    }
+                    return `<span style="color: #22c55e;">Documents</span>  <span style="color: #22c55e;">Downloads</span>  <span style="color: #22c55e;">Projects</span>  readme.txt`;
+                },
+                'pwd': () => '/home/admin',
+                'history': () => terminalHistory.map((cmd, i) => `  ${(terminalHistory.length - i).toString().padStart(4)}  ${cmd}`).join('\n') || 'No commands in history',
+                'cowsay': () => {
+                    const msg = args.join(' ') || 'Moo!';
+                    const len = msg.length;
+                    return ` ${'_'.repeat(len + 2)}
+< ${msg} >
+ ${'-'.repeat(len + 2)}
+        \\   ^__^
+         \\  (oo)\\_______
+            (__)\\       )\\/\\
+                ||----w |
+                ||     ||`;
+                },
+                'matrix': () => {
+                    startMatrixEffect();
+                    return '<span class="success">Matrix effect started... (type any command to stop)</span>';
+                },
+                'weather': () => {
+                    const conditions = ['Sunny ☀️', 'Cloudy ☁️', 'Rainy 🌧️', 'Stormy ⛈️', 'Snowy ❄️', 'Partly Cloudy ⛅'];
+                    const temp = Math.floor(Math.random() * 30 + 10);
+                    const humidity = Math.floor(Math.random() * 50 + 30);
+                    const wind = Math.floor(Math.random() * 30 + 5);
+                    return `<span class="info">Weather Report - ${new Date().toLocaleDateString()}</span>
+
+Location: Tampa, FL
+Condition: ${conditions[Math.floor(Math.random() * conditions.length)]}
+Temperature: ${temp}°C / ${Math.floor(temp * 9/5 + 32)}°F
+Humidity: ${humidity}%
+Wind: ${wind} km/h
+Visibility: ${Math.floor(Math.random() * 5 + 8)} km`;
+                },
+                'joke': () => {
+                    const jokes = [
+                        "Why do programmers prefer dark mode? Because light attracts bugs!",
+                        "A SQL query walks into a bar, walks up to two tables and asks... 'Can I join you?'",
+                        "Why do Java developers wear glasses? Because they can't C#!",
+                        "There are only 10 types of people in the world: those who understand binary and those who don't.",
+                        "Why was the JavaScript developer sad? Because he didn't Node how to Express himself!",
+                        "A programmer's wife tells him: 'Go to the store and get a loaf of bread. If they have eggs, get a dozen.' He comes back with 12 loaves.",
+                        "Why do programmers always mix up Halloween and Christmas? Because Oct 31 == Dec 25!",
+                    ];
+                    return `<span class="success">🎭</span> ${jokes[Math.floor(Math.random() * jokes.length)]}`;
+                },
+                'calc': () => {
+                    const expr = args.join('');
+                    try {
+                        const result = eval(expr.replace(/[^0-9+\-*/().]/g, ''));
+                        return `${expr} = <span class="success">${result}</span>`;
+                    } catch (e) {
+                        return `<span style="color: var(--danger);">Error: Invalid expression</span>`;
+                    }
+                },
             };
 
-            if (command === 'clear') {
+            if (cmd === 'clear') {
                 output.innerHTML = '';
-            } else if (commands[command]) {
-                output.innerHTML += `<div class="terminal-line"><span class="terminal-output">${commands[command].replace(/\n/g, '<br>')}</span></div>`;
+            } else if (commands[cmd]) {
+                const result = commands[cmd]();
+                if (result !== 'CLEAR') {
+                    output.innerHTML += `<div class="terminal-line"><span class="terminal-output">${result.replace(/\n/g, '<br>')}</span></div>`;
+                }
             } else if (command) {
-                output.innerHTML += `<div class="terminal-line"><span class="terminal-output" style="color: var(--danger);">Command not found: ${command}</span></div>`;
+                output.innerHTML += `<div class="terminal-line"><span class="terminal-output" style="color: var(--danger);">bash: ${cmd}: command not found</span></div>`;
             }
 
             input.value = '';
             output.scrollTop = output.scrollHeight;
         }
+
+        // Matrix effect
+        let matrixInterval = null;
+        function startMatrixEffect() {
+            if (matrixInterval) return;
+            const output = document.getElementById('terminal-output');
+            const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789';
+            
+            matrixInterval = setInterval(() => {
+                let line = '';
+                for (let i = 0; i < 60; i++) {
+                    const char = chars[Math.floor(Math.random() * chars.length)];
+                    const opacity = Math.random() * 0.7 + 0.3;
+                    line += `<span style="color: #22c55e; opacity: ${opacity}">${char}</span>`;
+                }
+                output.innerHTML += `<div class="terminal-line" style="font-family: monospace; letter-spacing: 2px;">${line}</div>`;
+                output.scrollTop = output.scrollHeight;
+            }, 100);
+        }
+
+        function stopMatrixEffect() {
+            if (matrixInterval) {
+                clearInterval(matrixInterval);
+                matrixInterval = null;
+            }
+        }
+
+        // Handle terminal input events
+        document.addEventListener('DOMContentLoaded', () => {
+            const termInput = document.getElementById('terminal-input');
+            if (termInput) {
+                termInput.addEventListener('keydown', (e) => {
+                    stopMatrixEffect();
+                    if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (historyIndex < terminalHistory.length - 1) {
+                            historyIndex++;
+                            termInput.value = terminalHistory[historyIndex];
+                        }
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        if (historyIndex > 0) {
+                            historyIndex--;
+                            termInput.value = terminalHistory[historyIndex];
+                        } else {
+                            historyIndex = -1;
+                            termInput.value = '';
+                        }
+                    }
+                });
+            }
+        });
 
         // Actions
         function refreshAll() {
@@ -1540,11 +2475,116 @@
         }
 
         function runSpeedTest() {
-            alert('Speed Test Results:\n\nDownload: 94.5 Mbps\nUpload: 47.2 Mbps\nPing: 12ms\nJitter: 3ms');
+            document.getElementById('speedtest-modal').classList.add('active');
+            runSpeedTestAnimation();
+        }
+
+        function runSpeedTestAnimation() {
+            const pingEl = document.getElementById('st-ping');
+            const downloadEl = document.getElementById('st-download');
+            const uploadEl = document.getElementById('st-upload');
+            const progressBar = document.getElementById('st-progress');
+            const statusEl = document.getElementById('st-status');
+            
+            // Reset
+            pingEl.textContent = '--';
+            downloadEl.textContent = '--';
+            uploadEl.textContent = '--';
+            progressBar.style.width = '0%';
+            statusEl.textContent = 'Testing ping...';
+            
+            // Phase 1: Ping
+            setTimeout(() => {
+                progressBar.style.width = '20%';
+                const ping = Math.floor(Math.random() * 15) + 5;
+                pingEl.textContent = ping + ' ms';
+                statusEl.textContent = 'Testing download speed...';
+            }, 800);
+            
+            // Phase 2: Download
+            let downloadSpeed = 0;
+            const downloadInterval = setInterval(() => {
+                downloadSpeed += Math.random() * 15 + 5;
+                if (downloadSpeed > 95) downloadSpeed = 94.5 + Math.random();
+                downloadEl.textContent = downloadSpeed.toFixed(1) + ' Mbps';
+                const progress = 20 + (downloadSpeed / 95 * 40);
+                progressBar.style.width = progress + '%';
+            }, 200);
+            
+            setTimeout(() => {
+                clearInterval(downloadInterval);
+                downloadEl.textContent = (90 + Math.random() * 10).toFixed(1) + ' Mbps';
+                progressBar.style.width = '60%';
+                statusEl.textContent = 'Testing upload speed...';
+                
+                // Phase 3: Upload
+                let uploadSpeed = 0;
+                const uploadInterval = setInterval(() => {
+                    uploadSpeed += Math.random() * 8 + 3;
+                    if (uploadSpeed > 50) uploadSpeed = 47 + Math.random() * 3;
+                    uploadEl.textContent = uploadSpeed.toFixed(1) + ' Mbps';
+                    const progress = 60 + (uploadSpeed / 50 * 40);
+                    progressBar.style.width = progress + '%';
+                }, 200);
+                
+                setTimeout(() => {
+                    clearInterval(uploadInterval);
+                    uploadEl.textContent = (45 + Math.random() * 10).toFixed(1) + ' Mbps';
+                    progressBar.style.width = '100%';
+                    statusEl.textContent = 'Speed test complete!';
+                    statusEl.style.color = 'var(--success)';
+                }, 2000);
+            }, 2500);
         }
 
         function clearCache() {
-            alert('Cache cleared successfully!\n\nFreed: 245 MB');
+            document.getElementById('cache-modal').classList.add('active');
+            runCacheClearAnimation();
+        }
+
+        function runCacheClearAnimation() {
+            const progressBar = document.getElementById('cache-progress');
+            const statusEl = document.getElementById('cache-status');
+            const freedEl = document.getElementById('cache-freed');
+            const itemsEl = document.getElementById('cache-items');
+            
+            // Reset
+            progressBar.style.width = '0%';
+            statusEl.textContent = 'Scanning cache...';
+            freedEl.textContent = '0 MB';
+            itemsEl.textContent = '0';
+            
+            const cacheTypes = [
+                { name: 'Browser cache', size: 85 },
+                { name: 'Temporary files', size: 62 },
+                { name: 'Thumbnail cache', size: 34 },
+                { name: 'DNS cache', size: 12 },
+                { name: 'Font cache', size: 18 },
+                { name: 'Icon cache', size: 24 }
+            ];
+            
+            let currentSize = 0;
+            let currentItems = 0;
+            let typeIndex = 0;
+            
+            const interval = setInterval(() => {
+                if (typeIndex >= cacheTypes.length) {
+                    clearInterval(interval);
+                    progressBar.style.width = '100%';
+                    statusEl.textContent = 'Cache cleared successfully!';
+                    statusEl.style.color = 'var(--success)';
+                    return;
+                }
+                
+                const cache = cacheTypes[typeIndex];
+                statusEl.textContent = `Clearing ${cache.name}...`;
+                currentSize += cache.size;
+                currentItems += Math.floor(Math.random() * 50) + 10;
+                freedEl.textContent = currentSize + ' MB';
+                itemsEl.textContent = currentItems;
+                progressBar.style.width = ((typeIndex + 1) / cacheTypes.length * 100) + '%';
+                typeIndex++;
+            }, 400);
         }
 
         function showNotifications() {
@@ -1552,8 +2592,641 @@
         }
 
         function showSettings() {
-            alert('Settings panel coming soon!');
+            document.getElementById('settings-modal').classList.add('active');
         }
+
+        // Settings functions
+        function changeTheme(theme) {
+            const root = document.documentElement;
+            if (theme === 'light') {
+                root.style.setProperty('--bg-primary', '#f8fafc');
+                root.style.setProperty('--bg-secondary', '#ffffff');
+                root.style.setProperty('--text-primary', '#1e293b');
+                root.style.setProperty('--text-secondary', '#64748b');
+            } else if (theme === 'midnight') {
+                root.style.setProperty('--bg-primary', '#0f172a');
+                root.style.setProperty('--bg-secondary', '#1e293b');
+                root.style.setProperty('--text-primary', '#f1f5f9');
+                root.style.setProperty('--text-secondary', '#94a3b8');
+            } else {
+                root.style.setProperty('--bg-primary', '#0a0a0f');
+                root.style.setProperty('--bg-secondary', '#12121a');
+                root.style.setProperty('--text-primary', '#e2e8f0');
+                root.style.setProperty('--text-secondary', '#94a3b8');
+            }
+        }
+
+        function changeAccent(color) {
+            document.documentElement.style.setProperty('--primary', color);
+        }
+
+        let refreshInterval = 2000;
+        let autoRefreshEnabled = true;
+
+        function setRefreshRate(rate) {
+            refreshInterval = parseInt(rate);
+        }
+
+        function toggleAutoRefresh(enabled) {
+            autoRefreshEnabled = enabled;
+            document.getElementById('toggle-slider').style.transform = enabled ? 'translateX(24px)' : 'translateX(0)';
+        }
+
+        function resetSettings() {
+            document.getElementById('theme-select').value = 'dark';
+            document.getElementById('accent-color').value = '#6366f1';
+            document.getElementById('refresh-rate').value = '2000';
+            document.getElementById('cpu-threshold').value = '80';
+            document.getElementById('mem-threshold').value = '85';
+            document.getElementById('cpu-threshold-val').textContent = '80%';
+            document.getElementById('mem-threshold-val').textContent = '85%';
+            changeTheme('dark');
+            changeAccent('#6366f1');
+        }
+
+        function saveSettings() {
+            closeModal('settings-modal');
+            alert('Settings saved successfully!');
+        }
+
+        // Process Manager Section
+        let processData = [];
+        let selectedProcesses = new Set();
+        let processAutoRefresh = true;
+        let processRefreshInterval = null;
+
+        const processTemplates = [
+            { name: 'chrome.exe', icon: 'fab fa-chrome', color: '#4285f4', user: 'admin', baseCpu: 12, baseMem: 2048 },
+            { name: 'code.exe', icon: 'fas fa-code', color: '#007acc', user: 'admin', baseCpu: 8, baseMem: 1536 },
+            { name: 'node.exe', icon: 'fab fa-node-js', color: '#339933', user: 'admin', baseCpu: 5, baseMem: 512 },
+            { name: 'docker.exe', icon: 'fab fa-docker', color: '#2496ed', user: 'system', baseCpu: 4, baseMem: 1024 },
+            { name: 'slack.exe', icon: 'fab fa-slack', color: '#4a154b', user: 'admin', baseCpu: 2, baseMem: 768 },
+            { name: 'spotify.exe', icon: 'fab fa-spotify', color: '#1db954', user: 'admin', baseCpu: 1.5, baseMem: 384 },
+            { name: 'explorer.exe', icon: 'fas fa-folder', color: '#f59e0b', user: 'system', baseCpu: 0.8, baseMem: 256 },
+            { name: 'svchost.exe', icon: 'fas fa-cog', color: '#6b7280', user: 'system', baseCpu: 0.5, baseMem: 128 },
+            { name: 'mysqld.exe', icon: 'fas fa-database', color: '#00758f', user: 'system', baseCpu: 3, baseMem: 512 },
+            { name: 'nginx.exe', icon: 'fas fa-server', color: '#009639', user: 'system', baseCpu: 1, baseMem: 64 },
+            { name: 'python.exe', icon: 'fab fa-python', color: '#3776ab', user: 'admin', baseCpu: 6, baseMem: 256 },
+            { name: 'java.exe', icon: 'fab fa-java', color: '#ed8b00', user: 'admin', baseCpu: 7, baseMem: 1024 },
+            { name: 'firefox.exe', icon: 'fab fa-firefox', color: '#ff7139', user: 'admin', baseCpu: 9, baseMem: 1800 },
+            { name: 'discord.exe', icon: 'fab fa-discord', color: '#5865f2', user: 'admin', baseCpu: 2.5, baseMem: 450 },
+            { name: 'git.exe', icon: 'fab fa-git-alt', color: '#f05032', user: 'admin', baseCpu: 0.2, baseMem: 32 },
+        ];
+
+        function generateProcessData() {
+            processData = processTemplates.map((template, index) => {
+                const cpuVariance = (Math.random() - 0.5) * template.baseCpu * 0.5;
+                const memVariance = (Math.random() - 0.5) * template.baseMem * 0.3;
+                return {
+                    pid: 1000 + Math.floor(Math.random() * 9000),
+                    name: template.name,
+                    icon: template.icon,
+                    color: template.color,
+                    user: template.user,
+                    cpu: Math.max(0.1, template.baseCpu + cpuVariance).toFixed(1),
+                    memory: Math.max(16, Math.floor(template.baseMem + memVariance)),
+                    threads: Math.floor(Math.random() * 50) + 1,
+                    status: Math.random() > 0.05 ? 'Running' : 'Suspended',
+                    priority: ['Low', 'Normal', 'Normal', 'Normal', 'High'][Math.floor(Math.random() * 5)],
+                    startTime: new Date(Date.now() - Math.random() * 86400000 * 7),
+                    handles: Math.floor(Math.random() * 1000) + 50,
+                };
+            });
+            return processData;
+        }
+
+        function initializeProcessTable() {
+            generateProcessData();
+            renderProcessTable();
+            updateProcessStats();
+            
+            // Start auto-refresh
+            if (processAutoRefresh && !processRefreshInterval) {
+                processRefreshInterval = setInterval(() => {
+                    updateProcessValues();
+                }, 3000);
+            }
+        }
+
+        function updateProcessValues() {
+            processData.forEach(proc => {
+                const template = processTemplates.find(t => t.name === proc.name);
+                if (template) {
+                    const cpuVariance = (Math.random() - 0.5) * template.baseCpu * 0.5;
+                    const memVariance = (Math.random() - 0.5) * template.baseMem * 0.2;
+                    proc.cpu = Math.max(0.1, template.baseCpu + cpuVariance).toFixed(1);
+                    proc.memory = Math.max(16, Math.floor(template.baseMem + memVariance));
+                }
+            });
+            renderProcessTable();
+            updateProcessStats();
+        }
+
+        function renderProcessTable() {
+            const tbody = document.getElementById('process-table-body');
+            if (!tbody) return;
+
+            const sortValue = document.getElementById('process-sort')?.value || 'cpu-desc';
+            const searchValue = document.getElementById('process-search')?.value.toLowerCase() || '';
+
+            let filtered = processData.filter(p => 
+                p.name.toLowerCase().includes(searchValue) || 
+                p.user.toLowerCase().includes(searchValue) ||
+                p.pid.toString().includes(searchValue)
+            );
+
+            // Sort
+            const [sortKey, sortDir] = sortValue.split('-');
+            filtered.sort((a, b) => {
+                let valA, valB;
+                switch(sortKey) {
+                    case 'cpu': valA = parseFloat(a.cpu); valB = parseFloat(b.cpu); break;
+                    case 'memory': valA = a.memory; valB = b.memory; break;
+                    case 'name': valA = a.name.toLowerCase(); valB = b.name.toLowerCase(); break;
+                    case 'pid': valA = a.pid; valB = b.pid; break;
+                    default: valA = parseFloat(a.cpu); valB = parseFloat(b.cpu);
+                }
+                if (sortDir === 'asc') return valA > valB ? 1 : -1;
+                return valA < valB ? 1 : -1;
+            });
+
+            tbody.innerHTML = filtered.map(p => {
+                const cpuColor = parseFloat(p.cpu) > 10 ? 'var(--danger)' : parseFloat(p.cpu) > 5 ? 'var(--warning)' : 'var(--success)';
+                const isSelected = selectedProcesses.has(p.pid);
+                return `
+                    <tr style="transition: background 0.2s;" ${isSelected ? 'class="selected-row"' : ''}>
+                        <td><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleProcessSelection(${p.pid}, this.checked)"></td>
+                        <td style="font-family: monospace;">${p.pid}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 28px; height: 28px; border-radius: 6px; background: ${p.color}20; color: ${p.color}; display: flex; align-items: center; justify-content: center;">
+                                    <i class="${p.icon}" style="font-size: 0.8rem;"></i>
+                                </div>
+                                <span style="font-weight: 500;">${p.name}</span>
+                            </div>
+                        </td>
+                        <td style="color: var(--text-secondary);">${p.user}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 50px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                    <div style="width: ${Math.min(parseFloat(p.cpu) * 5, 100)}%; height: 100%; background: ${cpuColor}; border-radius: 3px;"></div>
+                                </div>
+                                <span style="color: ${cpuColor}; font-weight: 600; min-width: 45px;">${p.cpu}%</span>
+                            </div>
+                        </td>
+                        <td>${formatMemory(p.memory)}</td>
+                        <td style="color: var(--text-secondary);">${p.threads}</td>
+                        <td><span class="status-badge ${p.status === 'Running' ? 'running' : 'warning'}">${p.status}</span></td>
+                        <td><span style="padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; background: ${p.priority === 'High' ? 'rgba(239,68,68,0.15)' : p.priority === 'Low' ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.05)'}; color: ${p.priority === 'High' ? 'var(--danger)' : p.priority === 'Low' ? 'var(--info)' : 'var(--text-secondary)'};">${p.priority}</span></td>
+                        <td style="text-align: center;">
+                            <div style="display: flex; gap: 5px; justify-content: center;">
+                                <button class="btn btn-sm" style="padding: 4px 8px; font-size: 0.7rem;" onclick="showProcessDetails(${p.pid})" title="Details">
+                                    <i class="fas fa-info"></i>
+                                </button>
+                                <button class="btn btn-sm" style="padding: 4px 8px; font-size: 0.7rem;" onclick="changePriority(${p.pid})" title="Change Priority">
+                                    <i class="fas fa-sliders-h"></i>
+                                </button>
+                                <button class="btn btn-sm" style="padding: 4px 8px; font-size: 0.7rem; color: var(--danger);" onclick="killProcess(${p.pid})" title="End Process">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Update counts
+            document.getElementById('pm-showing').textContent = `Showing ${filtered.length}`;
+            document.getElementById('pm-total').textContent = processData.length;
+        }
+
+        function formatMemory(mb) {
+            if (mb >= 1024) {
+                return (mb / 1024).toFixed(1) + ' GB';
+            }
+            return mb + ' MB';
+        }
+
+        function updateProcessStats() {
+            const running = processData.filter(p => p.status === 'Running').length;
+            const totalCpu = processData.reduce((sum, p) => sum + parseFloat(p.cpu), 0);
+            const totalMem = processData.reduce((sum, p) => sum + p.memory, 0);
+
+            document.getElementById('pm-total-processes').textContent = processData.length;
+            document.getElementById('pm-running').textContent = running;
+            document.getElementById('pm-total-cpu').textContent = totalCpu.toFixed(1) + '%';
+            document.getElementById('pm-total-mem').textContent = formatMemory(totalMem);
+        }
+
+        function toggleProcessSelection(pid, checked) {
+            if (checked) {
+                selectedProcesses.add(pid);
+            } else {
+                selectedProcesses.delete(pid);
+            }
+            updateSelectedCount();
+        }
+
+        function toggleAllProcesses(checked) {
+            if (checked) {
+                processData.forEach(p => selectedProcesses.add(p.pid));
+            } else {
+                selectedProcesses.clear();
+            }
+            renderProcessTable();
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const count = selectedProcesses.size;
+            document.getElementById('selected-count').textContent = count;
+            document.getElementById('kill-selected-btn').disabled = count === 0;
+        }
+
+        function filterProcesses() {
+            renderProcessTable();
+        }
+
+        function sortProcessTable() {
+            renderProcessTable();
+        }
+
+        function refreshProcessTable() {
+            generateProcessData();
+            selectedProcesses.clear();
+            document.getElementById('select-all-processes').checked = false;
+            updateSelectedCount();
+            renderProcessTable();
+            updateProcessStats();
+            
+            // Visual feedback
+            const btn = event.currentTarget;
+            const icon = btn.querySelector('i');
+            icon.classList.add('fa-spin');
+            setTimeout(() => icon.classList.remove('fa-spin'), 1000);
+        }
+
+        function toggleProcessAutoRefresh() {
+            processAutoRefresh = !processAutoRefresh;
+            const status = document.getElementById('pm-auto-status');
+            const icon = document.getElementById('pm-auto-icon');
+            
+            if (processAutoRefresh) {
+                status.textContent = 'ON';
+                status.style.color = 'var(--success)';
+                icon.className = 'fas fa-pause';
+                processRefreshInterval = setInterval(updateProcessValues, 3000);
+            } else {
+                status.textContent = 'OFF';
+                status.style.color = 'var(--danger)';
+                icon.className = 'fas fa-play';
+                clearInterval(processRefreshInterval);
+                processRefreshInterval = null;
+            }
+        }
+
+        function killProcess(pid) {
+            const proc = processData.find(p => p.pid === pid);
+            if (!proc) return;
+            
+            if (confirm(`Are you sure you want to end "${proc.name}" (PID: ${pid})?`)) {
+                processData = processData.filter(p => p.pid !== pid);
+                selectedProcesses.delete(pid);
+                renderProcessTable();
+                updateProcessStats();
+                updateSelectedCount();
+            }
+        }
+
+        function killSelectedProcesses() {
+            if (selectedProcesses.size === 0) return;
+            
+            if (confirm(`End ${selectedProcesses.size} selected process(es)?`)) {
+                processData = processData.filter(p => !selectedProcesses.has(p.pid));
+                selectedProcesses.clear();
+                document.getElementById('select-all-processes').checked = false;
+                renderProcessTable();
+                updateProcessStats();
+                updateSelectedCount();
+            }
+        }
+
+        function showProcessDetails(pid) {
+            const proc = processData.find(p => p.pid === pid);
+            if (!proc) return;
+
+            const uptime = Math.floor((Date.now() - proc.startTime) / 1000);
+            const hours = Math.floor(uptime / 3600);
+            const mins = Math.floor((uptime % 3600) / 60);
+            const secs = uptime % 60;
+
+            document.getElementById('process-details-content').innerHTML = `
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+                    <div style="width: 50px; height: 50px; border-radius: 12px; background: ${proc.color}20; color: ${proc.color}; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        <i class="${proc.icon}"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.2rem; font-weight: 600;">${proc.name}</div>
+                        <div style="color: var(--text-secondary);">PID: ${proc.pid}</div>
+                    </div>
+                    <span class="status-badge ${proc.status === 'Running' ? 'running' : 'warning'}" style="margin-left: auto;">${proc.status}</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px;">CPU Usage</div>
+                        <div style="font-size: 1.1rem; font-weight: 600; color: var(--info);">${proc.cpu}%</div>
+                    </div>
+                    <div style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px;">Memory</div>
+                        <div style="font-size: 1.1rem; font-weight: 600; color: var(--success);">${formatMemory(proc.memory)}</div>
+                    </div>
+                    <div style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px;">Threads</div>
+                        <div style="font-size: 1.1rem; font-weight: 600;">${proc.threads}</div>
+                    </div>
+                    <div style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px;">Handles</div>
+                        <div style="font-size: 1.1rem; font-weight: 600;">${proc.handles}</div>
+                    </div>
+                    <div style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px;">User</div>
+                        <div style="font-size: 1.1rem; font-weight: 600;">${proc.user}</div>
+                    </div>
+                    <div style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px;">Priority</div>
+                        <div style="font-size: 1.1rem; font-weight: 600;">${proc.priority}</div>
+                    </div>
+                    <div style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; grid-column: span 2;">
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px;">Running Time</div>
+                        <div style="font-size: 1.1rem; font-weight: 600;">${hours}h ${mins}m ${secs}s</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="changePriority(${proc.pid}); closeModal('process-details-modal');">
+                        <i class="fas fa-sliders-h"></i> Change Priority
+                    </button>
+                    <button class="btn btn-primary" style="background: var(--danger);" onclick="killProcess(${proc.pid}); closeModal('process-details-modal');">
+                        <i class="fas fa-times"></i> End Process
+                    </button>
+                </div>
+            `;
+            document.getElementById('process-details-modal').classList.add('active');
+        }
+
+        function changePriority(pid) {
+            const proc = processData.find(p => p.pid === pid);
+            if (!proc) return;
+            
+            const priorities = ['Low', 'Normal', 'High', 'Realtime'];
+            const current = priorities.indexOf(proc.priority);
+            const newPriority = prompt(`Change priority for ${proc.name}:\n\nCurrent: ${proc.priority}\n\nEnter new priority (Low, Normal, High, Realtime):`);
+            
+            if (newPriority && priorities.map(p => p.toLowerCase()).includes(newPriority.toLowerCase())) {
+                proc.priority = priorities.find(p => p.toLowerCase() === newPriority.toLowerCase());
+                renderProcessTable();
+            }
+        }
+
+        function showNewProcessModal() {
+            document.getElementById('new-process-name').value = '';
+            document.getElementById('new-process-priority').value = 'Normal';
+            document.getElementById('new-process-user').value = 'admin';
+            document.getElementById('new-process-modal').classList.add('active');
+        }
+
+        function startNewProcess() {
+            const name = document.getElementById('new-process-name').value.trim();
+            const priority = document.getElementById('new-process-priority').value;
+            const user = document.getElementById('new-process-user').value;
+
+            if (!name) {
+                alert('Please enter a process name');
+                return;
+            }
+
+            const newProc = {
+                pid: 1000 + Math.floor(Math.random() * 9000),
+                name: name.endsWith('.exe') ? name : name + '.exe',
+                icon: 'fas fa-cog',
+                color: '#6b7280',
+                user: user,
+                cpu: (Math.random() * 5).toFixed(1),
+                memory: Math.floor(Math.random() * 500) + 50,
+                threads: Math.floor(Math.random() * 20) + 1,
+                status: 'Running',
+                priority: priority,
+                startTime: new Date(),
+                handles: Math.floor(Math.random() * 200) + 20,
+            };
+
+            processData.unshift(newProc);
+            renderProcessTable();
+            updateProcessStats();
+            closeModal('new-process-modal');
+        }
+
+        function exportProcessList() {
+            const csv = 'PID,Name,User,CPU%,Memory (MB),Threads,Status,Priority\n' +
+                processData.map(p => `${p.pid},${p.name},${p.user},${p.cpu},${p.memory},${p.threads},${p.status},${p.priority}`).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'processes.csv';
+            a.click();
+        }
+
+        // Services Manager Section
+        function initializeServicesTable() {
+            const services = [
+                { name: 'Apache Web Server', status: 'Running', startup: 'Automatic' },
+                { name: 'MySQL Database', status: 'Running', startup: 'Automatic' },
+                { name: 'Redis Cache', status: 'Running', startup: 'Automatic' },
+                { name: 'SSH Daemon', status: 'Running', startup: 'Automatic' },
+                { name: 'FTP Server', status: 'Stopped', startup: 'Manual' },
+                { name: 'Mail Server', status: 'Running', startup: 'Automatic' },
+                { name: 'Backup Service', status: 'Stopped', startup: 'Manual' },
+                { name: 'Monitoring Agent', status: 'Running', startup: 'Automatic' },
+            ];
+
+            const tbody = document.getElementById('services-tbody');
+            if (tbody) {
+                tbody.innerHTML = services.map(s => `
+                    <tr>
+                        <td><i class="fas fa-server" style="margin-right: 8px; color: var(--primary);"></i>${s.name}</td>
+                        <td><span class="status-badge ${s.status === 'Running' ? 'running' : 'stopped'}">${s.status}</span></td>
+                        <td>${s.startup}</td>
+                        <td>
+                            <button class="btn btn-sm" style="padding: 4px 8px; font-size: 0.75rem; margin-right: 4px;" onclick="toggleService('${s.name}', '${s.status}')">
+                                <i class="fas fa-${s.status === 'Running' ? 'stop' : 'play'}"></i> ${s.status === 'Running' ? 'Stop' : 'Start'}
+                            </button>
+                            <button class="btn btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="restartService('${s.name}')">
+                                <i class="fas fa-sync"></i> Restart
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function filterServices() {
+            const filter = document.getElementById('service-filter').value;
+            const rows = document.querySelectorAll('#services-tbody tr');
+            rows.forEach(row => {
+                const status = row.cells[1].textContent.trim();
+                if (filter === 'all' || status.toLowerCase() === filter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleService(name, currentStatus) {
+            const newStatus = currentStatus === 'Running' ? 'Stopped' : 'Started';
+            alert(`Service "${name}" ${newStatus.toLowerCase()}.`);
+            initializeServicesTable();
+        }
+
+        function restartService(name) {
+            alert(`Service "${name}" restarted successfully.`);
+        }
+
+        // Logs Section
+        function loadLogs() {
+            const logType = document.getElementById('log-type').value;
+            const logLevel = document.getElementById('log-level').value;
+            const container = document.getElementById('logs-container');
+            
+            const logs = [
+                { time: '2025-01-15 14:32:15', level: 'info', message: 'System started successfully' },
+                { time: '2025-01-15 14:32:16', level: 'info', message: 'Network interface eth0 initialized' },
+                { time: '2025-01-15 14:32:18', level: 'warning', message: 'High memory usage detected: 78%' },
+                { time: '2025-01-15 14:32:20', level: 'info', message: 'Apache server started on port 80' },
+                { time: '2025-01-15 14:32:22', level: 'error', message: 'Failed to connect to backup server' },
+                { time: '2025-01-15 14:32:25', level: 'info', message: 'MySQL database connection established' },
+                { time: '2025-01-15 14:32:28', level: 'warning', message: 'SSL certificate expires in 30 days' },
+                { time: '2025-01-15 14:32:30', level: 'info', message: 'Scheduled backup started' },
+                { time: '2025-01-15 14:32:35', level: 'error', message: 'Disk space low on /dev/sdb1' },
+                { time: '2025-01-15 14:32:40', level: 'info', message: 'User admin logged in from 192.168.1.100' },
+            ];
+
+            const filteredLogs = logs.filter(log => logLevel === 'all' || log.level === logLevel);
+            
+            container.innerHTML = filteredLogs.map(log => `
+                <div class="log-entry ${log.level}">
+                    <span class="log-time">${log.time}</span>
+                    <span class="log-level ${log.level}">[${log.level.toUpperCase()}]</span>
+                    <span class="log-message">${log.message}</span>
+                </div>
+            `).join('');
+        }
+
+        function exportLogs() {
+            const logs = document.getElementById('logs-container').innerText;
+            const blob = new Blob([logs], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'system-logs.txt';
+            a.click();
+            alert('Logs exported successfully!');
+        }
+
+        // Network Section
+        function initializeNetworkSection() {
+            const interfaces = [
+                { name: 'eth0', ip: '192.168.1.100', status: 'Connected', speed: '1 Gbps' },
+                { name: 'wlan0', ip: '192.168.1.105', status: 'Connected', speed: '300 Mbps' },
+                { name: 'docker0', ip: '172.17.0.1', status: 'Active', speed: 'Virtual' },
+                { name: 'lo', ip: '127.0.0.1', status: 'Active', speed: 'Loopback' },
+            ];
+
+            const connections = [
+                { local: '192.168.1.100:443', remote: '142.250.80.46:443', status: 'ESTABLISHED', process: 'chrome' },
+                { local: '192.168.1.100:22', remote: '10.0.0.50:54321', status: 'ESTABLISHED', process: 'sshd' },
+                { local: '192.168.1.100:3306', remote: '192.168.1.200:45678', status: 'ESTABLISHED', process: 'mysqld' },
+                { local: '192.168.1.100:80', remote: '0.0.0.0:*', status: 'LISTENING', process: 'apache2' },
+                { local: '192.168.1.100:6379', remote: '0.0.0.0:*', status: 'LISTENING', process: 'redis' },
+            ];
+
+            const interfacesGrid = document.getElementById('network-interfaces');
+            if (interfacesGrid) {
+                interfacesGrid.innerHTML = interfaces.map(iface => `
+                    <div class="glass-card" style="padding: 15px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <i class="fas fa-network-wired" style="color: var(--primary); font-size: 1.5rem;"></i>
+                            <strong>${iface.name}</strong>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            <div>IP: ${iface.ip}</div>
+                            <div>Speed: ${iface.speed}</div>
+                            <div>Status: <span style="color: var(--success);">${iface.status}</span></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const connTbody = document.getElementById('connections-tbody');
+            if (connTbody) {
+                connTbody.innerHTML = connections.map(c => `
+                    <tr>
+                        <td>${c.local}</td>
+                        <td>${c.remote}</td>
+                        <td><span class="status-badge ${c.status === 'ESTABLISHED' ? 'running' : 'warning'}">${c.status}</span></td>
+                        <td>${c.process}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Update showSection to handle all sections
+        const originalShowSection = showSection;
+        showSection = function(section) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+
+            // Hide all sections
+            const sections = ['dashboard-section', 'tools-section', 'terminal-section', 'processes-section', 'services-section', 'logs-section', 'network-section'];
+            sections.forEach(s => {
+                const el = document.getElementById(s);
+                if (el) el.style.display = 'none';
+            });
+
+            // Show selected section
+            switch(section) {
+                case 'dashboard':
+                    document.getElementById('dashboard-section').style.display = 'grid';
+                    break;
+                case 'processes':
+                    document.getElementById('processes-section').style.display = 'block';
+                    initializeProcessTable();
+                    break;
+                case 'services':
+                    document.getElementById('services-section').style.display = 'block';
+                    initializeServicesTable();
+                    break;
+                case 'logs':
+                    document.getElementById('logs-section').style.display = 'block';
+                    loadLogs();
+                    break;
+                case 'network':
+                    document.getElementById('network-section').style.display = 'block';
+                    initializeNetworkSection();
+                    break;
+                case 'tools':
+                    document.getElementById('tools-section').style.display = 'block';
+                    break;
+                case 'terminal':
+                    document.getElementById('terminal-section').style.display = 'block';
+                    break;
+                default:
+                    document.getElementById('dashboard-section').style.display = 'grid';
+            }
+        };
     </script>
 </body>
 </html>

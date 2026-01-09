@@ -99,17 +99,30 @@ show_system_info() {
     section_header "📊 System Information"
     
     echo -e "${WHITE}Hostname:${NC}      $(hostname)"
-    echo -e "${WHITE}OS:${NC}            $(uname -s) $(uname -r)"
-    echo -e "${WHITE}Architecture:${NC}  $(uname -m)"
-    echo -e "${WHITE}Kernel:${NC}        $(uname -r)"
     
-    if [ -f /etc/os-release ]; then
-        echo -e "${WHITE}Distribution:${NC}  $(grep PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d '"')"
+    # Windows-compatible system info
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+        echo -e "${WHITE}OS:${NC}            Windows $(cmd.exe /c ver 2>/dev/null | grep -oP '\d+\.\d+\.\d+' | head -1)"
+        echo -e "${WHITE}Architecture:${NC}  $(uname -m)"
+        echo -e "${WHITE}Computer:${NC}      $COMPUTERNAME"
+        echo -e "${WHITE}Current User:${NC}  $USERNAME"
+        echo -e "${WHITE}User Domain:${NC}   $USERDOMAIN"
+        echo -e "${WHITE}Shell:${NC}         Git Bash ($(bash --version | head -1 | cut -d' ' -f4))"
+        echo -e "${WHITE}Home Dir:${NC}      $USERPROFILE"
+    else
+        echo -e "${WHITE}OS:${NC}            $(uname -s) $(uname -r)"
+        echo -e "${WHITE}Architecture:${NC}  $(uname -m)"
+        echo -e "${WHITE}Kernel:${NC}        $(uname -r)"
+        
+        if [ -f /etc/os-release ]; then
+            echo -e "${WHITE}Distribution:${NC}  $(grep PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d '"')"
+        fi
+        
+        echo -e "${WHITE}Uptime:${NC}        $(uptime -p 2>/dev/null || uptime | awk '{print $3,$4}' | tr -d ',')"
+        echo -e "${WHITE}Current User:${NC}  $USER"
+        echo -e "${WHITE}Shell:${NC}         $SHELL"
     fi
     
-    echo -e "${WHITE}Uptime:${NC}        $(uptime -p 2>/dev/null || uptime | awk '{print $3,$4}' | tr -d ',')"
-    echo -e "${WHITE}Current User:${NC}  $USER"
-    echo -e "${WHITE}Shell:${NC}         $SHELL"
     echo -e "${WHITE}Date/Time:${NC}     $(date '+%Y-%m-%d %H:%M:%S %Z')"
     
     log "Displayed system information"
@@ -119,7 +132,14 @@ show_system_info() {
 show_cpu_info() {
     section_header "🖥️  CPU Information"
     
-    if [ -f /proc/cpuinfo ]; then
+    # Windows-compatible CPU info
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+        echo -e "${WHITE}CPU Information from Windows:${NC}"
+        wmic cpu get Name,NumberOfCores,NumberOfLogicalProcessors,MaxClockSpeed 2>/dev/null | head -3
+        echo ""
+        echo -e "${WHITE}Current CPU Usage:${NC}"
+        powershell.exe -Command "Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1 | Select-Object -ExpandProperty CounterSamples | Select-Object -ExpandProperty CookedValue" 2>/dev/null | xargs printf "%.1f%%\n"
+    elif [ -f /proc/cpuinfo ]; then
         echo -e "${WHITE}Model:${NC}         $(grep 'model name' /proc/cpuinfo | head -1 | cut -d: -f2 | xargs)"
         echo -e "${WHITE}Cores:${NC}         $(grep -c processor /proc/cpuinfo)"
         echo -e "${WHITE}Architecture:${NC}  $(uname -m)"
@@ -142,7 +162,21 @@ show_cpu_info() {
 show_memory_info() {
     section_header "🧠 Memory Information"
     
-    if command -v free &> /dev/null; then
+    # Windows-compatible memory info
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+        echo -e "${WHITE}Memory Information from Windows:${NC}"
+        powershell.exe -Command "
+            \$os = Get-CimInstance Win32_OperatingSystem
+            \$total = [math]::Round(\$os.TotalVisibleMemorySize / 1MB, 2)
+            \$free = [math]::Round(\$os.FreePhysicalMemory / 1MB, 2)
+            \$used = [math]::Round(\$total - \$free, 2)
+            \$percent = [math]::Round((\$used / \$total) * 100, 1)
+            Write-Output \"Total Memory:  \$total GB\"
+            Write-Output \"Used Memory:   \$used GB\"
+            Write-Output \"Free Memory:   \$free GB\"
+            Write-Output \"Usage:         \$percent%\"
+        " 2>/dev/null
+    elif command -v free &> /dev/null; then
         echo -e "${WHITE}Memory Usage:${NC}"
         free -h | head -2
         echo ""
@@ -174,24 +208,42 @@ show_memory_info() {
 show_disk_usage() {
     section_header "💾 Disk Usage"
     
-    echo -e "${WHITE}Filesystem      Size  Used  Avail  Use%  Mounted on${NC}"
-    echo "────────────────────────────────────────────────────────"
-    
-    df -h | grep -E '^/dev/' | while read line; do
-        usage=$(echo "$line" | awk '{print $5}' | tr -d '%')
-        if [ "$usage" -gt 90 ]; then
-            color=$RED
-        elif [ "$usage" -gt 70 ]; then
-            color=$YELLOW
-        else
-            color=$GREEN
-        fi
-        echo -e "${color}$line${NC}"
-    done
-    
-    echo ""
-    echo -e "${WHITE}Total Disk Space:${NC}"
-    df -h --total 2>/dev/null | grep total || df -h | tail -1
+    # Windows-compatible disk info
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+        echo -e "${WHITE}Drive    Size      Used      Free      Use%${NC}"
+        echo "────────────────────────────────────────────────────────"
+        powershell.exe -Command "
+            Get-PSDrive -PSProvider FileSystem | ForEach-Object {
+                if (\$_.Used -gt 0 -or \$_.Free -gt 0) {
+                    \$total = \$_.Used + \$_.Free
+                    \$usedGB = [math]::Round(\$_.Used / 1GB, 1)
+                    \$freeGB = [math]::Round(\$_.Free / 1GB, 1)
+                    \$totalGB = [math]::Round(\$total / 1GB, 1)
+                    \$percent = if (\$total -gt 0) { [math]::Round((\$_.Used / \$total) * 100, 0) } else { 0 }
+                    Write-Output (\"{0}:       {1} GB    {2} GB    {3} GB    {4}%\" -f \$_.Name, \$totalGB, \$usedGB, \$freeGB, \$percent)
+                }
+            }
+        " 2>/dev/null
+    else
+        echo -e "${WHITE}Filesystem      Size  Used  Avail  Use%  Mounted on${NC}"
+        echo "────────────────────────────────────────────────────────"
+        
+        df -h | grep -E '^/dev/' | while read line; do
+            usage=$(echo "$line" | awk '{print $5}' | tr -d '%')
+            if [ "$usage" -gt 90 ]; then
+                color=$RED
+            elif [ "$usage" -gt 70 ]; then
+                color=$YELLOW
+            else
+                color=$GREEN
+            fi
+            echo -e "${color}$line${NC}"
+        done
+        
+        echo ""
+        echo -e "${WHITE}Total Disk Space:${NC}"
+        df -h --total 2>/dev/null | grep total || df -h | tail -1
+    fi
     
     log "Displayed disk usage"
 }
@@ -202,30 +254,42 @@ show_network_info() {
     
     echo -e "${WHITE}Hostname:${NC}      $(hostname)"
     
-    # IP Addresses
-    echo -e "\n${WHITE}IP Addresses:${NC}"
-    if command -v ip &> /dev/null; then
-        ip addr show | grep "inet " | grep -v "127.0.0.1" | awk '{print "  " $2 " on " $NF}'
-    elif command -v ifconfig &> /dev/null; then
-        ifconfig | grep "inet " | grep -v "127.0.0.1" | awk '{print "  " $2}'
-    fi
-    
-    # Default Gateway
-    echo -e "\n${WHITE}Default Gateway:${NC}"
-    ip route | grep default | awk '{print "  " $3}'
-    
-    # DNS Servers
-    echo -e "\n${WHITE}DNS Servers:${NC}"
-    if [ -f /etc/resolv.conf ]; then
-        grep nameserver /etc/resolv.conf | awk '{print "  " $2}'
-    fi
-    
-    # Active Connections
-    echo -e "\n${WHITE}Active Connections:${NC}"
-    if command -v ss &> /dev/null; then
-        ss -tuln 2>/dev/null | head -10
-    elif command -v netstat &> /dev/null; then
-        netstat -tuln 2>/dev/null | head -10
+    # Windows-compatible network info
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+        echo -e "\n${WHITE}IP Configuration:${NC}"
+        ipconfig | grep -E "IPv4|Subnet|Gateway" | head -10
+        
+        echo -e "\n${WHITE}DNS Servers:${NC}"
+        ipconfig /all | grep "DNS Servers" | head -3
+        
+        echo -e "\n${WHITE}Active Connections:${NC}"
+        netstat -an | grep "ESTABLISHED" | head -10
+    else
+        # IP Addresses
+        echo -e "\n${WHITE}IP Addresses:${NC}"
+        if command -v ip &> /dev/null; then
+            ip addr show | grep "inet " | grep -v "127.0.0.1" | awk '{print "  " $2 " on " $NF}'
+        elif command -v ifconfig &> /dev/null; then
+            ifconfig | grep "inet " | grep -v "127.0.0.1" | awk '{print "  " $2}'
+        fi
+        
+        # Default Gateway
+        echo -e "\n${WHITE}Default Gateway:${NC}"
+        ip route | grep default | awk '{print "  " $3}'
+        
+        # DNS Servers
+        echo -e "\n${WHITE}DNS Servers:${NC}"
+        if [ -f /etc/resolv.conf ]; then
+            grep nameserver /etc/resolv.conf | awk '{print "  " $2}'
+        fi
+        
+        # Active Connections
+        echo -e "\n${WHITE}Active Connections:${NC}"
+        if command -v ss &> /dev/null; then
+            ss -tuln 2>/dev/null | head -10
+        elif command -v netstat &> /dev/null; then
+            netstat -tuln 2>/dev/null | head -10
+        fi
     fi
     
     log "Displayed network information"
@@ -235,12 +299,24 @@ show_network_info() {
 show_processes() {
     section_header "⚙️  Process Manager"
     
-    echo -e "${WHITE}Top 15 Processes by CPU:${NC}"
-    echo ""
-    ps aux --sort=-%cpu 2>/dev/null | head -16 || ps aux | head -16
-    
-    echo ""
-    echo -e "${WHITE}Process Count:${NC} $(ps aux | wc -l)"
+    # Windows-compatible process list
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+        echo -e "${WHITE}Top Processes by CPU (Windows):${NC}"
+        echo ""
+        powershell.exe -Command "
+            Get-Process | Sort-Object CPU -Descending | Select-Object -First 15 Name, Id, CPU, @{N='Memory(MB)';E={[math]::Round(\$_.WorkingSet64/1MB,1)}} | Format-Table -AutoSize
+        " 2>/dev/null
+        
+        echo ""
+        echo -e "${WHITE}Process Count:${NC} $(tasklist 2>/dev/null | wc -l)"
+    else
+        echo -e "${WHITE}Top 15 Processes by CPU:${NC}"
+        echo ""
+        ps aux --sort=-%cpu 2>/dev/null | head -16 || ps aux | head -16
+        
+        echo ""
+        echo -e "${WHITE}Process Count:${NC} $(ps aux | wc -l)"
+    fi
     
     log "Displayed process list"
 }
@@ -249,7 +325,18 @@ show_processes() {
 show_services() {
     section_header "🔧 Service Manager"
     
-    if command -v systemctl &> /dev/null; then
+    # Windows-compatible service list
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+        echo -e "${WHITE}Running Windows Services:${NC}"
+        powershell.exe -Command "
+            Get-Service | Where-Object {\$_.Status -eq 'Running'} | Select-Object -First 20 Name, DisplayName, Status | Format-Table -AutoSize
+        " 2>/dev/null
+        
+        echo ""
+        total=$(powershell.exe -Command "(Get-Service).Count" 2>/dev/null)
+        running=$(powershell.exe -Command "(Get-Service | Where-Object {\$_.Status -eq 'Running'}).Count" 2>/dev/null)
+        echo -e "${WHITE}Total Services:${NC} $total (Running: $running)"
+    elif command -v systemctl &> /dev/null; then
         echo -e "${WHITE}Active Services:${NC}"
         systemctl list-units --type=service --state=running 2>/dev/null | head -20
     elif command -v service &> /dev/null; then
@@ -305,7 +392,12 @@ ping_host() {
     
     if [ -n "$host" ]; then
         section_header "Pinging $host"
-        ping -c 5 "$host" 2>&1
+        # Windows-compatible ping (uses -n instead of -c)
+        if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+            ping -n 5 "$host" 2>&1
+        else
+            ping -c 5 "$host" 2>&1
+        fi
         log "Pinged $host"
     fi
 }
@@ -324,10 +416,20 @@ port_scanner() {
         IFS=',' read -ra PORT_ARRAY <<< "$ports"
         for port in "${PORT_ARRAY[@]}"; do
             port=$(echo "$port" | tr -d ' ')
-            if timeout 2 bash -c "echo >/dev/tcp/$host/$port" 2>/dev/null; then
-                echo -e "${CHECK} Port $port: ${GREEN}OPEN${NC}"
+            # Try PowerShell Test-NetConnection on Windows, or /dev/tcp on Linux
+            if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+                result=$(powershell.exe -Command "Test-NetConnection -ComputerName $host -Port $port -WarningAction SilentlyContinue | Select-Object -ExpandProperty TcpTestSucceeded" 2>/dev/null)
+                if [[ "$result" == *"True"* ]]; then
+                    echo -e "${CHECK} Port $port: ${GREEN}OPEN${NC}"
+                else
+                    echo -e "${CROSS} Port $port: ${RED}CLOSED${NC}"
+                fi
             else
-                echo -e "${CROSS} Port $port: ${RED}CLOSED${NC}"
+                if timeout 2 bash -c "echo >/dev/tcp/$host/$port" 2>/dev/null; then
+                    echo -e "${CHECK} Port $port: ${GREEN}OPEN${NC}"
+                else
+                    echo -e "${CROSS} Port $port: ${RED}CLOSED${NC}"
+                fi
             fi
         done
         
@@ -344,7 +446,10 @@ dns_lookup() {
     if [ -n "$domain" ]; then
         section_header "DNS Lookup: $domain"
         
-        if command -v nslookup &> /dev/null; then
+        # Windows-compatible DNS lookup
+        if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+            nslookup "$domain" 2>&1
+        elif command -v nslookup &> /dev/null; then
             nslookup "$domain"
         elif command -v dig &> /dev/null; then
             dig "$domain"
@@ -367,7 +472,10 @@ trace_route() {
     if [ -n "$host" ]; then
         section_header "Traceroute to $host"
         
-        if command -v traceroute &> /dev/null; then
+        # Windows uses tracert, Linux uses traceroute
+        if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+            tracert "$host" 2>&1
+        elif command -v traceroute &> /dev/null; then
             traceroute "$host" 2>&1
         elif command -v tracepath &> /dev/null; then
             tracepath "$host" 2>&1
@@ -383,15 +491,21 @@ trace_route() {
 network_stats() {
     section_header "Network Statistics"
     
-    if command -v ss &> /dev/null; then
+    # Windows-compatible network stats
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+        echo -e "${WHITE}Network Statistics:${NC}"
+        netstat -e 2>/dev/null
+        echo ""
+        echo -e "${WHITE}Active Connections:${NC}"
+        netstat -an | head -20 2>/dev/null
+    elif command -v ss &> /dev/null; then
         echo -e "${WHITE}Socket Summary:${NC}"
         ss -s
-    fi
-    
-    echo ""
-    echo -e "${WHITE}Interface Statistics:${NC}"
-    if command -v ip &> /dev/null; then
-        ip -s link | head -30
+        echo ""
+        echo -e "${WHITE}Interface Statistics:${NC}"
+        if command -v ip &> /dev/null; then
+            ip -s link | head -30
+        fi
     fi
 }
 
@@ -399,10 +513,13 @@ network_stats() {
 show_arp() {
     section_header "ARP Table"
     
+    # Windows and Linux both have arp -a
     if command -v arp &> /dev/null; then
-        arp -a
+        arp -a 2>&1
     elif command -v ip &> /dev/null; then
         ip neigh
+    else
+        echo -e "${YELLOW}ARP command not available${NC}"
     fi
 }
 
@@ -412,7 +529,23 @@ speed_test() {
     
     echo -e "${INFO} Testing download speed..."
     
-    if command -v curl &> /dev/null; then
+    # Windows-compatible speed test
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
+        echo -e "${INFO} Using PowerShell for speed test..."
+        result=$(powershell.exe -Command "
+            \$start = Get-Date
+            try {
+                Invoke-WebRequest -Uri 'http://speedtest.tele2.net/1MB.zip' -OutFile 'NUL' -TimeoutSec 30
+                \$end = Get-Date
+                \$duration = (\$end - \$start).TotalSeconds
+                \$speed = [math]::Round(8 / \$duration, 2)
+                Write-Output \"Download speed: ~\${speed} Mbps (1MB test file)\"
+            } catch {
+                Write-Output 'Speed test failed - check internet connection'
+            }
+        " 2>/dev/null)
+        echo -e "${CHECK} $result"
+    elif command -v curl &> /dev/null; then
         # Simple speed test using curl
         start_time=$(date +%s.%N)
         curl -s -o /dev/null http://speedtest.tele2.net/1MB.zip 2>/dev/null
@@ -424,7 +557,7 @@ speed_test() {
         echo -e "${CHECK} Download speed: ~${GREEN}${speed} Mbps${NC}"
         echo -e "${INFO} (Based on 1MB test file)"
     else
-        echo -e "${YELLOW}curl not available for speed test${NC}"
+        echo -e "${YELLOW}Speed test tools not available${NC}"
     fi
 }
 

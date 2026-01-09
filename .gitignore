@@ -1,0 +1,9 @@
+﻿# Compiled files
+*.class
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.cache
+__pycache__/

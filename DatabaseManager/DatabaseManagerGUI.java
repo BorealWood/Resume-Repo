@@ -139,6 +139,75 @@ public class DatabaseManagerGUI extends JFrame {
         // Set dark look
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            
+            // Set dark theme defaults for all components
+            UIManager.put("Panel.background", DARK_BG);
+            UIManager.put("Table.background", CARD_BG);
+            UIManager.put("Table.foreground", TEXT_PRIMARY);
+            UIManager.put("Table.selectionBackground", ACCENT);
+            UIManager.put("Table.selectionForeground", TEXT_PRIMARY);
+            UIManager.put("Table.gridColor", BORDER_COLOR);
+            UIManager.put("TableHeader.background", DARKER_BG);
+            UIManager.put("TableHeader.foreground", TEXT_PRIMARY);
+            UIManager.put("Tree.background", DARKER_BG);
+            UIManager.put("Tree.foreground", TEXT_PRIMARY);
+            UIManager.put("Tree.selectionBackground", ACCENT);
+            UIManager.put("Tree.selectionForeground", TEXT_PRIMARY);
+            UIManager.put("Tree.textBackground", DARKER_BG);
+            UIManager.put("Tree.textForeground", TEXT_PRIMARY);
+            UIManager.put("List.background", DARKER_BG);
+            UIManager.put("List.foreground", TEXT_PRIMARY);
+            UIManager.put("List.selectionBackground", ACCENT);
+            UIManager.put("List.selectionForeground", TEXT_PRIMARY);
+            UIManager.put("ScrollPane.background", DARK_BG);
+            UIManager.put("Viewport.background", CARD_BG);
+            UIManager.put("TabbedPane.background", CARD_BG);
+            UIManager.put("TabbedPane.foreground", TEXT_PRIMARY);
+            UIManager.put("TabbedPane.selected", ACCENT);
+            UIManager.put("TabbedPane.selectedForeground", TEXT_PRIMARY);
+            UIManager.put("TabbedPane.contentAreaColor", CARD_BG);
+            UIManager.put("TabbedPane.tabAreaBackground", CARD_BG);
+            UIManager.put("TabbedPane.unselectedBackground", DARKER_BG);
+            UIManager.put("TabbedPane.borderHightlightColor", BORDER_COLOR);
+            UIManager.put("TabbedPane.darkShadow", BORDER_COLOR);
+            UIManager.put("TabbedPane.light", CARD_BG);
+            UIManager.put("TabbedPane.highlight", CARD_BG);
+            UIManager.put("TabbedPane.shadow", BORDER_COLOR);
+            UIManager.put("TabbedPane.focus", ACCENT);
+            UIManager.put("TextField.background", CARD_BG);
+            UIManager.put("TextField.foreground", TEXT_PRIMARY);
+            UIManager.put("TextField.caretForeground", TEXT_PRIMARY);
+            UIManager.put("TextArea.background", CARD_BG);
+            UIManager.put("TextArea.foreground", TEXT_PRIMARY);
+            UIManager.put("TextArea.caretForeground", TEXT_PRIMARY);
+            UIManager.put("ComboBox.background", CARD_BG);
+            UIManager.put("ComboBox.foreground", TEXT_PRIMARY);
+            UIManager.put("ComboBox.selectionBackground", ACCENT);
+            UIManager.put("ComboBox.selectionForeground", TEXT_PRIMARY);
+            UIManager.put("Button.background", CARD_BG);
+            UIManager.put("Button.foreground", TEXT_PRIMARY);
+            UIManager.put("OptionPane.background", DARK_BG);
+            UIManager.put("OptionPane.messageForeground", TEXT_PRIMARY);
+            UIManager.put("OptionPane.messageBackground", DARK_BG);
+            UIManager.put("Dialog.background", DARK_BG);
+            UIManager.put("Label.foreground", TEXT_PRIMARY);
+            UIManager.put("SplitPane.background", DARK_BG);
+            UIManager.put("SplitPaneDivider.draggingColor", ACCENT);
+            UIManager.put("ScrollBar.background", DARKER_BG);
+            UIManager.put("ScrollBar.thumb", CARD_BG);
+            UIManager.put("ScrollBar.track", DARKER_BG);
+            UIManager.put("Menu.background", DARKER_BG);
+            UIManager.put("Menu.foreground", TEXT_PRIMARY);
+            UIManager.put("Menu.selectionBackground", ACCENT);
+            UIManager.put("Menu.selectionForeground", TEXT_PRIMARY);
+            UIManager.put("MenuItem.background", DARKER_BG);
+            UIManager.put("MenuItem.foreground", TEXT_PRIMARY);
+            UIManager.put("MenuItem.selectionBackground", ACCENT);
+            UIManager.put("MenuItem.selectionForeground", TEXT_PRIMARY);
+            UIManager.put("PopupMenu.background", DARKER_BG);
+            UIManager.put("PopupMenu.foreground", TEXT_PRIMARY);
+            UIManager.put("Separator.background", BORDER_COLOR);
+            UIManager.put("Separator.foreground", BORDER_COLOR);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -267,11 +336,12 @@ public class DatabaseManagerGUI extends JFrame {
         button.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
         button.setForeground(TEXT_PRIMARY);
         button.setBackground(CARD_BG);
-        button.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR),
-            BorderFactory.createEmptyBorder(5, 12, 5, 12)
-        ));
+        button.setOpaque(true);
+        button.setContentAreaFilled(true);
+        button.setBorderPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
         button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.addActionListener(action);
         button.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
@@ -293,6 +363,17 @@ public class DatabaseManagerGUI extends JFrame {
         mainSplit.setDividerLocation(250);
         mainSplit.setBorder(null);
         mainSplit.setDividerSize(3);
+        mainSplit.setBackground(DARK_BG);
+        mainSplit.setUI(new javax.swing.plaf.basic.BasicSplitPaneUI() {
+            public javax.swing.plaf.basic.BasicSplitPaneDivider createDefaultDivider() {
+                return new javax.swing.plaf.basic.BasicSplitPaneDivider(this) {
+                    public void paint(Graphics g) {
+                        g.setColor(BORDER_COLOR);
+                        g.fillRect(0, 0, getSize().width, getSize().height);
+                    }
+                };
+            }
+        });
         
         // Left sidebar - Database explorer
         mainSplit.setLeftComponent(createDatabaseExplorer());
@@ -302,6 +383,17 @@ public class DatabaseManagerGUI extends JFrame {
         rightSplit.setDividerLocation(350);
         rightSplit.setBorder(null);
         rightSplit.setDividerSize(3);
+        rightSplit.setBackground(DARK_BG);
+        rightSplit.setUI(new javax.swing.plaf.basic.BasicSplitPaneUI() {
+            public javax.swing.plaf.basic.BasicSplitPaneDivider createDefaultDivider() {
+                return new javax.swing.plaf.basic.BasicSplitPaneDivider(this) {
+                    public void paint(Graphics g) {
+                        g.setColor(BORDER_COLOR);
+                        g.fillRect(0, 0, getSize().width, getSize().height);
+                    }
+                };
+            }
+        });
         
         rightSplit.setTopComponent(createQueryEditor());
         rightSplit.setBottomComponent(createResultsPanel());
@@ -532,18 +624,55 @@ public class DatabaseManagerGUI extends JFrame {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBackground(CARD_BG);
         tabbedPane.setForeground(TEXT_PRIMARY);
+        tabbedPane.setOpaque(true);
+        tabbedPane.setBorder(null);
         
         // Results tab
-        resultsTable = new JTable();
+        resultsTable = new JTable() {
+            @Override
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                Component c = super.prepareRenderer(renderer, row, column);
+                if (isRowSelected(row)) {
+                    c.setBackground(ACCENT);
+                    c.setForeground(TEXT_PRIMARY);
+                } else {
+                    c.setBackground(row % 2 == 0 ? CARD_BG : new Color(35, 35, 48));
+                    c.setForeground(TEXT_PRIMARY);
+                }
+                return c;
+            }
+        };
         resultsTable.setBackground(CARD_BG);
         resultsTable.setForeground(TEXT_PRIMARY);
         resultsTable.setGridColor(BORDER_COLOR);
         resultsTable.setSelectionBackground(ACCENT);
+        resultsTable.setSelectionForeground(TEXT_PRIMARY);
         resultsTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         resultsTable.setRowHeight(28);
+        resultsTable.setShowGrid(true);
+        resultsTable.setIntercellSpacing(new Dimension(1, 1));
         resultsTable.getTableHeader().setBackground(DARKER_BG);
         resultsTable.getTableHeader().setForeground(TEXT_PRIMARY);
         resultsTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        resultsTable.getTableHeader().setOpaque(true);
+        
+        // Custom header renderer for dark theme
+        resultsTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                label.setBackground(DARKER_BG);
+                label.setForeground(TEXT_PRIMARY);
+                label.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                label.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 0, 1, 1, BORDER_COLOR),
+                    BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                ));
+                label.setOpaque(true);
+                return label;
+            }
+        });
         
         JScrollPane tableScroll = new JScrollPane(resultsTable);
         tableScroll.setBorder(null);
