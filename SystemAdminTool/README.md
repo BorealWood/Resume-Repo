@@ -1,22 +1,57 @@
-# System Administration Tool
+# System Administration Tool Pro
 
 **Author:** Eyasu Solomon  
+**Version:** 2.0  
 **Language:** C#  
-**Framework:** .NET 6.0
+**Framework:** .NET 6.0 (Windows Forms)
 
 ## Overview
 
-An interactive console-based system administration tool demonstrating proficiency in C#, Windows system management, and troubleshooting skills.
+A full-featured Windows Forms GUI application for system administration. Demonstrates proficiency in C#, Windows APIs, GUI development, and system management.
+
+## Files
+
+| File | Description |
+|------|-------------|
+| `SystemAdminTool.cs` | Original console version |
+| `SystemAdminToolGUI.cs` | **Full Windows Forms GUI** |
 
 ## Features
 
-- **System Information** - View detailed system specs including OS, CPU, RAM, and uptime
-- **Network Diagnostics** - View network interfaces and perform ping tests
-- **Process Manager** - List, search, and manage running processes
-- **Disk Space Analyzer** - Visual disk usage with progress bars
-- **Service Manager** - View and search Windows services
-- **Event Log Viewer** - Browse Application, System, and Security logs
-- **Performance Monitor** - Real-time CPU and RAM monitoring
+### Dashboard Tab
+- Real-time CPU and RAM gauges
+- System uptime display
+- Live refresh every 2 seconds
+
+### Process Manager Tab
+- DataGridView with all processes
+- Search/filter by name
+- Kill process functionality
+- CPU/Memory usage columns
+
+### Network Tab
+- Network interface listing
+- Ping tool with results
+- IP address display
+- Bytes sent/received stats
+
+### Services Tab
+- Windows services listing
+- Start/Stop/Restart buttons
+- Status filtering (Running/Stopped/All)
+- Service search
+
+### Disk Analyzer Tab
+- TreeView folder browser
+- Disk space breakdown
+- File listing with sizes
+- Drive selection
+
+### Event Log Tab
+- Application/System/Security logs
+- Date range filtering
+- Level filtering (Info/Warning/Error)
+- Message details view
 
 ## How to Run
 

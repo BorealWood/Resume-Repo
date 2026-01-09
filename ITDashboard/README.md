@@ -1,36 +1,62 @@
-# IT Dashboard - Web Application
+# IT Dashboard Pro - Web Application
 
 **Author:** Eyasu Solomon  
+**Version:** 2.0  
 **Languages:** HTML5, CSS3, JavaScript  
 **Type:** Single-Page Application
 
 ## Overview
 
-An interactive web-based IT dashboard for monitoring system resources and network status. Demonstrates proficiency in front-end web development, UI/UX design, and JavaScript programming.
+A professional web-based IT dashboard with modern glassmorphism UI, real-time monitoring, interactive tools, and a built-in terminal. Demonstrates advanced front-end development, UI/UX design, and JavaScript programming.
+
+## Files
+
+| File | Description |
+|------|-------------|
+| `index.html` | Original dashboard version |
+| `index_pro.html` | **Enhanced Pro version with full features** |
 
 ## Features
 
+### Modern UI
+- Glassmorphism dark theme with animated backgrounds
+- Sidebar navigation with section highlighting
+- Responsive design for all screen sizes
+- Smooth CSS transitions and animations
+
 ### Real-Time Monitoring
-- **CPU Usage** - Live animated progress bar with color-coded warnings
-- **Memory Usage** - Displays used/total RAM with percentage
-- **Disk Usage** - Storage monitoring with visual indicator
-- **Network Status** - Upload/download speeds and latency
+- **CPU Usage** - Animated progress bar with live updates
+- **Memory Usage** - Visual bar with GB breakdown
+- **Disk Usage** - Color-coded usage indicator
+- **Network Status** - Speed (Mbps) and latency display
 
 ### Network Activity Chart
-- Visual bar chart showing hourly network activity
-- Interactive hover effects with detailed tooltips
+- 12-hour bar chart with upload/download visualization
+- Interactive hover effects with tooltips
 
-### System Services Table
-- Display of running services with status indicators
-- Shows uptime, CPU, and memory usage per service
-- Color-coded status badges (Online/Warning/Offline)
+### Process Manager
+- Top 5 processes with CPU/memory stats
+- Process icons and PID display
 
-### Interactive Tools
-- **Ping Tool** - Simulate network connectivity tests
-- **DNS Lookup** - Query domain name records
-- **Port Scanner** - Check for open ports
-- **Subnet Calculator** - IP address calculations
-- **Password Generator** - Create secure passwords
+### Services Grid
+- 6 service cards with status indicators
+- Online/Warning/Offline states with glow effects
+
+### Network Tools Suite
+- **Ping Tool** - Test connectivity with simulated responses
+- **Port Scanner** - Scan multiple ports with results
+- **DNS Lookup** - Query A, MX, NS records
+- **Subnet Calculator** - CIDR calculations
+
+### Interactive Terminal
+- Built-in command-line interface
+- Commands: help, date, whoami, uptime, neofetch, ps, df, clear
+
+### Quick Actions
+- Speed Test simulation
+- Clear Cache utility
+- Export System Report (JSON)
+- Password Generator
 
 ## How to Run
 

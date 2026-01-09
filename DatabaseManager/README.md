@@ -1,22 +1,54 @@
-# Database Management System Simulator
+# Database Manager Pro
 
 **Author:** Eyasu Solomon  
+**Version:** 2.0  
 **Language:** Java  
-**Version:** Java 8+
+**Framework:** Java Swing
 
 ## Overview
 
-An interactive Java application that simulates a database management system. Demonstrates proficiency in Object-Oriented Programming including inheritance, polymorphism, interfaces, encapsulation, and design patterns.
+A full-featured GUI database management application built with Java Swing. Features a modern dark theme, SQL editor, database browser, and query execution. Demonstrates advanced OOP, GUI development, and database concepts.
+
+## Files
+
+| File | Description |
+|------|-------------|
+| `DatabaseManager.java` | Original console version |
+| `DatabaseManagerGUI.java` | **Full Swing GUI application** |
 
 ## Features
 
-- **Create Tables** - Define custom tables with typed columns
-- **Insert Records** - Add data with type validation
-- **Select/Query** - Retrieve records with optional WHERE conditions
-- **Update Records** - Modify existing data
-- **Delete Records** - Remove records by condition
-- **Describe Tables** - View table structure
-- **SQL Query Executor** - Execute basic SQL commands
+### Database Explorer (Left Panel)
+- Tree view of databases and tables
+- Double-click table to auto-query
+- Expandable/collapsible nodes
+- Query history with click-to-restore
+
+### SQL Query Editor (Center)
+- Syntax-aware text area
+- Line numbers
+- Tab-based multiple queries
+- Query formatting (Ctrl+Shift+F)
+
+### Results Panel (Bottom)
+- JTable with sortable columns
+- Console output tab
+- Timestamped execution logs
+- Row count display
+
+### SQL Support
+- SELECT with WHERE clause filtering
+- INSERT INTO (simulated)
+- UPDATE (simulated)
+- DELETE (simulated)
+- CREATE TABLE
+
+### Menu Bar
+- **File**: New Connection, Open, Import SQL, Export
+- **Edit**: Undo, Redo, Cut, Copy, Paste
+- **Query**: Execute (F5), Format, Clear
+- **Database**: Create Database, Create Table, Refresh
+- **Help**: Documentation, About
 
 ## Data Types Supported
 

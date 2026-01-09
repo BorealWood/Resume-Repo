@@ -1,23 +1,57 @@
-# Network & System Data Analyzer
+# System Monitor Pro
 
 **Author:** Eyasu Solomon  
+**Version:** 2.0  
 **Language:** Python 3  
-**Dependencies:** psutil (optional, enhances functionality)
+**Framework:** Tkinter  
+**Dependencies:** psutil
 
 ## Overview
 
-An interactive Python-based tool for comprehensive system and network data analysis. Demonstrates proficiency in Python programming, data analysis, and system administration.
+A modern GUI system monitoring application built with Tkinter. Features a dark theme, real-time updates, and comprehensive tools for system analysis and network diagnostics.
+
+## Files
+
+| File | Description |
+|------|-------------|
+| `data_analyzer.py` | Original console version |
+| `data_analyzer_gui.py` | **Full Tkinter GUI application** |
 
 ## Features
 
-- **System Information Analysis** - Detailed hardware and OS information
-- **Network Configuration** - Interface details, IP addresses, and I/O stats
-- **Process Statistics** - Top memory/CPU consumers and process analysis
-- **Disk Usage Visualization** - Visual progress bars for disk usage
-- **Memory Analysis** - RAM and swap usage with detailed breakdown
-- **Log File Analyzer** - Parse and analyze log files for patterns
-- **Port Scanner** - Scan for open ports on target systems
-- **Report Generator** - Export system reports to JSON and TXT
+### Dashboard Tab
+- Real-time CPU, Memory, Disk cards
+- Network status with speed display
+- Auto-refresh with threading
+- Dark modern theme
+
+### Process Manager Tab
+- Live process listing with search
+- CPU and Memory columns
+- Kill process button
+- Refresh functionality
+
+### Network Tools Tab
+- **Ping Tool** - Test connectivity with results
+- **Port Scanner** - Multi-threaded port scanning
+- Results display panel
+
+### Disk Analyzer Tab
+- Folder browser TreeView
+- File listing with sizes
+- Current path display
+- Size calculations
+
+### Log Analyzer Tab
+- Log file viewer
+- Level-based filtering
+- Search functionality
+- Syntax highlighting
+
+### Tools Tab
+- Password Generator
+- Stopwatch utility
+- Quick system actions
 
 ## Installation
 
